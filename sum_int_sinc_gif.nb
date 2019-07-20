@@ -1,0 +1,24 @@
+intpts = Table[{l, Integrate[Sin[k]/k, {k, -l, l}]}, {l, 0, 100}];
+
+sumpts = Table[{l, Sum[Limit[Sin[x]/x, x -> k], {k, -l, l}]}, {l, 0, 
+    100}];
+
+
+intpts[[All, 2]] = sumpts[[All, 2]] - intpts[[All, 2]];
+
+
+ClearAll[intplot, sumplot];
+intplot[ele_: All] := 
+ ListPlot[intpts[[1 ;; ele]], PlotRange -> { {0, 100}, {-1.2, 1.2}}, 
+  Frame -> True, 
+  FrameLabel -> {{None, None}, {None, 
+     " \!\(\*SuperscriptBox[SubscriptBox[\(\[Sum]\), \(\(\\\ \)\(-n\)\
+\)], \(n\)]\) \!\(\*FractionBox[\(sin \((k)\)\), \(k\)]\)  - \
+\!\(\*SuperscriptBox[SubscriptBox[\(\[Integral]\), \(-n\)], \(\(n\)\(\
+\\\ \)\)]\)\!\(\*FractionBox[\(sin \((x)\)\), \(x\)]\)dx   n=" <> 
+      ToString[ele]}}]
+
+gif1 = Table[intplot[i], {i, 1, Length[intpts]}];
+
+Export[ "sinc1.gif", gif1]
+
