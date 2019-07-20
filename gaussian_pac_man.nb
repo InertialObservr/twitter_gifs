@@ -1,0 +1,53 @@
+G1 = Table[
+   Plot[E^(-(x - t)^2), {x, -2.5, 2.5}, 
+    PlotRange -> {{-2.5, 2.5}, {0, 1.1}}, Filling -> Axis, 
+    PlotStyle -> Red, FillingStyle -> Red ], {t, -6.25, 0, 0.25}];
+G2 = Table[
+   Plot[E^(-(x)^2), {x, -2.5, 2.5}, 
+    PlotRange -> {{-2.5, 2.5}, {0, 1.1}}, Filling -> Axis, 
+    PlotStyle -> Red, FillingStyle -> Red ], {t, 0, .75, 0.1}];
+G3 = Table[
+   Plot[E^(-(x)^2), {x, -2.5, 2.5}, 
+    PlotRange -> {{-2.5, 2.5}, {0, 1.1}}, Filling -> Axis, 
+    PlotStyle -> Blue, FillingStyle -> Blue ], {t, 0, .75, 0.1}];
+G4 = Table[
+   Plot[E^(-(x - t)^2), {x, -2.5, 2.5}, 
+    PlotRange -> {{-2.5, 2.5}, {0, 1.1}}, Filling -> Axis, 
+    PlotStyle -> Blue, FillingStyle -> Blue ], {t, 0, 6.25, 0.25}];
+
+
+
+Export["g1.gif", Join[G1, G2, G3, G4], "DisplayDurations" -> .1, 
+  "AnimationRepetitions" -> \[Infinity]];
+
+
+open = Graphics[{Yellow, Disk[{-1, .5}, .5, {\[Pi]/4, 7 \[Pi]/4}]}];
+closed = Graphics[{Yellow, Disk[{-1, .5}, .5, {0, 2 \[Pi]}]}];
+
+Clear[pack]
+
+ghost[t_, color_] := 
+  Plot[E^(-(3 x - t)^2), {x, -2.5, 2.5}, 
+   PlotRange -> {{-1, 1}, {0, 1.1}}, Filling -> Axis, 
+   PlotStyle -> color, FillingStyle -> color];
+pack[t_] := 
+ If[Mod[t*10, 2] == 0, 
+  Graphics[{Yellow, Disk[{.5*t, .5}, .5, {\[Pi]/4, 7 \[Pi]/4}]}], 
+  Graphics[{Yellow, Disk[{.5*t, .5}, .5, {0, 2 \[Pi]}]}] ]
+packrev[t_] := 
+ If[Mod[t*10, 2] == 0, 
+  Graphics[{Yellow, 
+    Disk[{.5*t, .5}, .5, {-\[Pi] + \[Pi]/4, \[Pi] - \[Pi]/4}]}], 
+  Graphics[{Yellow, Disk[{.5*t, .5}, .5, {0, 2 \[Pi]}]}] ]
+
+g = Table[     
+   Show[ghost[1.4*t - 8, Red], ghost[1.4*t - 12, Cyan], 
+    ghost[1.4*t - 16, Orange],  
+    ghost[1.4*t - 20, Opacity[.5, Pink]] , pack[t - 3]  ] , {t, 0, 
+    18 + 4 , .5} ];
+g2 = Table[     
+   Show[ghost[-1.4*t + 4, Blue], ghost[-1.4*t + 8, Blue], 
+    ghost[-1.4*t + 12, Blue],  ghost[-1.4*t + 16, Blue] , 
+    packrev[-t + 16]  ] , {t, 0, 18 + 4 , .5} ];
+
+Export["g.gif", Join[g, g2]]
