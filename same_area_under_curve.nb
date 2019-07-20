@@ -1,0 +1,16 @@
+In[3103]:= 
+graph[\[Alpha]_, color_] := 
+  Plot[1/(1 + x^2)*1/(1 + x^\[Alpha]), {x, 0, 10}, Frame -> True, 
+   PlotStyle -> color, PlotRange -> {{0, 10}, {-.2, 1}}, 
+   PlotLabel -> "N=" <> ToString[\[Alpha]]];
+graph2[\[Alpha]_, color_] := 
+  Plot[1/(1 + x^2)*1/(1 + x^\[Alpha]), {x, 0, 5}, Frame -> True, 
+   PlotStyle -> color, PlotRange -> {{0, 5}, {-.2, 1}}, 
+   PlotLabel -> "N=" <> ToString[\[Alpha]]];
+
+In[3105]:= g1 = Table[graph[\[Alpha], Red], {\[Alpha], -10, 0, 0.1}];
+trans = Table[graph2[0, Blue], {\[Alpha], 0, 3, .1}];
+g2 = Table[graph2[\[Alpha], Blue], {\[Alpha], 0, 10, 0.1}];
+Export["pos.gif", Join[g1, g2]]
+
+Out[3108]= "pos.gif"
