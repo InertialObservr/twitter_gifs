@@ -1,175 +1,24 @@
-(*CacheID: 234*)
-(* Internal cache information:
-NotebookFileLineBreakTest
-NotebookFileLineBreakTest
-NotebookDataPosition[         0,          0]
-NotebookDataLength[      6836,        174]
-NotebookOptionsPosition[      6199,        152]
-NotebookOutlinePosition[      6535,        167]
-CellTagsIndexPosition[      6492,        164]
-WindowFrame->Normal*)
+Clear[point]
+point[prev_, n_] := Module[{ p},
+   If[Mod[n, 2] != 0, p = prev + {1/2 - prev[[1]]*(1/2), 0}, 
+    p = prev + {0, 1/2 - prev[[2]]*(1/2)}];
+   Return[p]
+   ];
 
-(* Beginning of Notebook Content *)
-Notebook[{
-Cell[BoxData[{
- RowBox[{"Clear", "[", "point", "]"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"point", "[", 
-    RowBox[{"prev_", ",", "n_"}], "]"}], " ", ":=", " ", 
-   RowBox[{"Module", "[", 
-    RowBox[{
-     RowBox[{"{", " ", "p", "}"}], ",", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"If", "[", 
-       RowBox[{
-        RowBox[{
-         RowBox[{"Mod", "[", 
-          RowBox[{"n", ",", " ", "2"}], "]"}], "\[NotEqual]", " ", "0"}], ",",
-         " ", 
-        RowBox[{"p", "=", " ", 
-         RowBox[{"prev", " ", "+", " ", 
-          RowBox[{"{", 
-           RowBox[{
-            RowBox[{
-             RowBox[{"1", "/", "2"}], "-", " ", 
-             RowBox[{
-              RowBox[{"prev", "[", 
-               RowBox[{"[", "1", "]"}], "]"}], "*", 
-              RowBox[{"(", 
-               RowBox[{"1", "/", "2"}], ")"}]}]}], ",", " ", "0"}], "}"}]}]}],
-         ",", " ", 
-        RowBox[{"p", " ", "=", " ", 
-         RowBox[{"prev", "+", 
-          RowBox[{"{", 
-           RowBox[{"0", ",", " ", 
-            RowBox[{
-             RowBox[{"1", "/", "2"}], "-", 
-             RowBox[{
-              RowBox[{"prev", "[", 
-               RowBox[{"[", "2", "]"}], "]"}], "*", 
-              RowBox[{"(", 
-               RowBox[{"1", "/", "2"}], ")"}]}]}]}], "}"}]}]}]}], "]"}], ";", 
-      "\[IndentingNewLine]", 
-      RowBox[{"Return", "[", "p", "]"}]}]}], "\[IndentingNewLine]", "]"}]}], 
-  ";"}]}], "Input",
- CellChangeTimes->{{3.772643552455091*^9, 3.772643596525025*^9}, {
-  3.772643701789657*^9, 3.7726437645387497`*^9}, {3.772643812146089*^9, 
-  3.7726440171091547`*^9}, {3.7726442723450108`*^9, 3.7726442729122562`*^9}, {
-  3.772644313006447*^9, 3.772644320456893*^9}, {3.7726443786069736`*^9, 
-  3.7726444046172256`*^9}, {3.7726444358848753`*^9, 3.772644440673778*^9}, {
-  3.772644477828865*^9, 3.772644569097891*^9}},
- CellLabel->
-  "In[2844]:=",ExpressionUUID->"aa1c6181-8305-40f5-b369-5d763d6ff3de"],
+recs[N_] := Module[{p0, tr, rex, pnext},
+   p0 = {0, 0};
+   tr = {1, 1};
+   rex = { Pink, EdgeForm[Thin], Rectangle[p0, tr] };
+   pnext = p0;
+   For[n = 1, n <= N, n++,
+    pnext = point[pnext, n];
+    rex = 
+     Append[ rex, {Hue[1/(n + 1)], EdgeForm[Thin], 
+       Rectangle[pnext, tr]}];
+    ];
+   Return[rex]
+   ];
 
-Cell[BoxData[
- RowBox[{
-  RowBox[{
-   RowBox[{"recs", "[", "N_", "]"}], ":=", 
-   RowBox[{"Module", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"p0", ",", "tr", ",", " ", "rex", ",", " ", "pnext"}], "}"}], 
-     ",", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"p0", "=", 
-       RowBox[{"{", 
-        RowBox[{"0", ",", "0"}], "}"}]}], ";", "\[IndentingNewLine]", 
-      RowBox[{"tr", "=", 
-       RowBox[{"{", 
-        RowBox[{"1", ",", "1"}], "}"}]}], ";", "\[IndentingNewLine]", 
-      RowBox[{"rex", "=", 
-       RowBox[{"{", " ", 
-        RowBox[{"Pink", ",", 
-         RowBox[{"EdgeForm", "[", "Thin", "]"}], ",", 
-         RowBox[{"Rectangle", "[", 
-          RowBox[{"p0", ",", " ", "tr"}], "]"}]}], " ", "}"}]}], ";", 
-      "\[IndentingNewLine]", 
-      RowBox[{"pnext", "=", "p0"}], ";", "\[IndentingNewLine]", 
-      RowBox[{"For", "[", 
-       RowBox[{
-        RowBox[{"n", "=", "1"}], ",", 
-        RowBox[{"n", "\[LessEqual]", " ", "N"}], ",", " ", 
-        RowBox[{"n", "++"}], ",", "\[IndentingNewLine]", 
-        RowBox[{
-         RowBox[{"pnext", " ", "=", " ", 
-          RowBox[{"point", "[", 
-           RowBox[{"pnext", ",", " ", "n"}], "]"}]}], ";", 
-         "\[IndentingNewLine]", 
-         RowBox[{"rex", " ", "=", " ", 
-          RowBox[{"Append", "[", " ", 
-           RowBox[{"rex", ",", 
-            RowBox[{"{", 
-             RowBox[{
-              RowBox[{"Hue", "[", 
-               RowBox[{"1", "/", 
-                RowBox[{"(", 
-                 RowBox[{"n", "+", "1"}], ")"}]}], "]"}], ",", 
-              RowBox[{"EdgeForm", "[", "Thin", "]"}], ",", 
-              RowBox[{"Rectangle", "[", 
-               RowBox[{"pnext", ",", " ", "tr"}], "]"}]}], "}"}]}], "]"}]}], 
-         ";"}]}], "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
-      RowBox[{"Return", "[", "rex", "]"}]}]}], "\[IndentingNewLine]", "]"}]}],
-   ";"}]], "Input",
- CellChangeTimes->{{3.772643849537565*^9, 3.772643851113124*^9}, {
-  3.7726448995373497`*^9, 3.772645029832378*^9}, {3.772645079783388*^9, 
-  3.7726451471716423`*^9}, {3.7726451979615602`*^9, 3.7726452299530697`*^9}, {
-  3.7726452658567247`*^9, 3.772645316504149*^9}, {3.7726453572574797`*^9, 
-  3.7726454482500153`*^9}, {3.772645486683037*^9, 3.772645529605238*^9}, {
-  3.772645584663032*^9, 3.772645633560586*^9}, {3.772645719204608*^9, 
-  3.772645730031169*^9}, {3.772645764666964*^9, 3.7726458226548862`*^9}, {
-  3.77264597159657*^9, 3.7726459739956417`*^9}, {3.772646004074215*^9, 
-  3.772646007888888*^9}, {3.7726463407459106`*^9, 3.7726463414070473`*^9}},
- CellLabel->
-  "In[2957]:=",ExpressionUUID->"5d625245-87e8-444d-b9d3-f65a669afa87"],
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"geogif", "=", " ", 
-   RowBox[{"Table", "[", " ", 
-    RowBox[{
-     RowBox[{"Graphics", "[", 
-      RowBox[{"recs", "[", "k", "]"}], "]"}], ",", " ", 
-     RowBox[{"{", 
-      RowBox[{"k", ",", " ", "0", ",", "14"}], "}"}]}], " ", "]"}]}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{"Export", "[", 
-  RowBox[{"\"\<geogif.gif\>\"", ",", " ", 
-   RowBox[{"Join", "[", 
-    RowBox[{"geogif", ",", " ", 
-     RowBox[{"Reverse", "[", "geogif", "]"}]}], "]"}], ",", 
-   RowBox[{"\"\<DisplayDurations\>\"", "\[Rule]", "0.3"}]}], 
-  "]"}], "\[IndentingNewLine]"}], "Input",
- CellChangeTimes->{{3.772645368360968*^9, 3.772645372488185*^9}, {
-  3.772645426443501*^9, 3.772645457393549*^9}, {3.772645514775578*^9, 
-  3.772645577969182*^9}, {3.772645639601618*^9, 3.772645643590816*^9}, {
-  3.7726457348357897`*^9, 3.7726457488484697`*^9}, {3.7726458396473217`*^9, 
-  3.772645935875477*^9}, {3.7726460539445677`*^9, 3.772646062968883*^9}, {
-  3.7726460978396053`*^9, 3.772646143716358*^9}, {3.7726461769619627`*^9, 
-  3.772646267832932*^9}, {3.77264629787468*^9, 3.772646325094781*^9}},
- CellLabel->
-  "In[2958]:=",ExpressionUUID->"acbb1d52-e85d-4c47-8e73-e002a70b5cb6"]
-},
-WindowSize->{808, 755},
-WindowMargins->{{44, Automatic}, {0, Automatic}},
-FrontEndVersion->"12.0 for Mac OS X x86 (64-bit) (April 8, 2019)",
-StyleDefinitions->"Default.nb"
-]
-(* End of Notebook Content *)
-
-(* Internal cache information *)
-(*CellTagsOutline
-CellTagsIndex->{}
-*)
-(*CellTagsIndex
-CellTagsIndex->{}
-*)
-(*NotebookFileOutline
-Notebook[{
-Cell[400, 13, 1947, 49, 154, "Input",ExpressionUUID->"aa1c6181-8305-40f5-b369-5d763d6ff3de"],
-Cell[2350, 64, 2647, 59, 259, "Input",ExpressionUUID->"5d625245-87e8-444d-b9d3-f65a669afa87"],
-Cell[5000, 125, 1195, 25, 91, "Input",ExpressionUUID->"acbb1d52-e85d-4c47-8e73-e002a70b5cb6"]
-}
-]
-*)
-
+geogif = Table[ Graphics[recs[k]], {k, 0, 14} ];
+Export["geogif.gif", Join[geogif, Reverse[geogif]], 
+ "DisplayDurations" -> 0.3]
