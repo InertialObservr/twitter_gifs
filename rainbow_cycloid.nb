@@ -1,0 +1,19 @@
+Clear[cyc];
+
+cyc[r_, tfin_: 2 \[Pi], R_: 1, V_: 1] := 
+ ParametricPlot[{V*t - r*Sin[V/R*t], R - r*Cos[V/R*t]}, {t, 0, tfin}, 
+  PlotStyle -> Lighter[Hue[r + 10^(-10)]], 
+  PlotRange -> {{0, 2 \[Pi]}, {0, 2}}, Frame -> True, 
+  FrameTicks -> None, Background -> Black]
+
+Clear[bub];
+bub[t_] := Table[ cyc[r, t], {r, 0, 1, .1}];
+
+
+Table[  Show[ Join[ bub[t] ]  , 
+   Graphics[ {White, Circle[{t, 1}, 1] }] ] , {t, .0001, 2 \[Pi], 
+   2 \[Pi]/60} ] ;
+   
+Export["cyc.gif", Join[%, Reverse[%]], 
+ "AnimationRepetitions" -> \[Infinity]]
+
