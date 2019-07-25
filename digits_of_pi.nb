@@ -1,0 +1,13 @@
+digit[i_] := RealDigits[\[Pi], 10, 1000 ][[1]][[i]];
+alldigits = RealDigits[\[Pi], 10, 1000 ][[1]];
+
+rec[i_] := {Lighter[Hue[i/10], .9], Rectangle[{i, 0}] };
+bright[i_] := { EdgeForm[Thick], Hue[i/10], Rectangle[{i, 0}] }
+all = Graphics[rec /@ Range[0, 9]];
+
+makeBright[i_] := 
+ Show[all, Graphics[bright[ digit[i]]  ], 
+  Background -> Darker[Gray, .6], Frame -> False, 
+  AspectRatio -> 1/GoldenRatio] 
+  
+  Export["pi.gif", makeBright /@ Range[1000], "DisplayDurations" -> .3]
