@@ -1,0 +1,18 @@
+Clear[y]
+
+y[t_] := {0, Cos[t]};
+
+p[t_] := Graphics[ {PointSize[.02], Green, Point[y[t]]} ];
+
+rhalf = RegionPlot[X^2 + Y^2 <= 1 && X > .05, {X, -1, 1}, {Y, -1, 1}, 
+   Frame -> False];
+lhalf = RegionPlot[
+   X^2 + Y^2 <= 1 && X < -.05, {X, -1, 1}, {Y, -1, 1}, 
+   Frame -> False];  
+   
+
+all[t_] := Show[rhalf, lhalf, p[t], Background -> Darker[Gray, .75]];
+
+
+Export["earth.gif", Table[all[t], {t, 0, 2 \[Pi], .25}], 
+ "AnimationRepetitions" -> \[Infinity], "DisplayDurations" -> .1]
