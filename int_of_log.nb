@@ -1,0 +1,21 @@
+Clear[poly];
+
+poly[x_, n_] := Assuming[ x > 1, Integrate[ y^n, {y, 1, x}] ]
+
+funcs = Table[{n, poly[x, n]}, {n, -3, 3, .1}];
+
+Clear[plotone]
+
+plotone[i_] := 
+ Plot[  funcs[[i, 2]] , {x, .5, 2}, PlotRange -> {{.5, 2}, {-1, 1}}, 
+  PlotStyle -> Lighter[Hue[ (3 - funcs[[i, 1]])/6 ], .3], 
+  Background -> Black, AxesStyle -> White, 
+  PlotLabel -> "n=" <> ToString[funcs[[i, 1]]], LabelStyle -> White]
+  
+  plots = Table[ 
+   Show[Reverse[ plotone[#] & /@ Range[i]]  ] , {i, 1, 
+    Length[funcs]}] ;
+    
+    Export["int.gif",   Join[  plots , Reverse[plots]
+  ],
+ ImageResolution -> 190]
