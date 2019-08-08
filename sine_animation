@@ -1,0 +1,101 @@
+x0s = Table[x0, {x0, 0, 2 \[Pi], 2 \[Pi]/10}];
+
+x0labs = Table[x0, {x0, 0, 2 \[Pi], \[Pi]/4}];
+
+Clear[y]
+y[f_, x0_] := ( D[f[x], x] /. x -> x0)*(x - x0) + f[x0] 
+
+Clear[func]
+func[x0_, \[CapitalDelta]y_: 0, \[CurlyEpsilon]_: 1] := Module[{k},
+  
+  k = y[Sin, x0] + \[CapitalDelta]y;
+  
+  Plot[ k, {x, x0 - \[CurlyEpsilon], x0 + \[CurlyEpsilon]}, 
+   PlotStyle -> { Opacity[.9], Green}, Background -> Black, 
+   AxesStyle -> White, Ticks -> {x0labs, {-1, 1}}]
+  
+  ]
+  
+  Clear[makeline]
+
+
+makeline[x0_, \[CapitalDelta]y_: 0, \[CurlyEpsilon]_: 1, dot_: False, 
+   i_: 1, op_: 1] := Module[{frames},
+   
+   If[i == 1, frames = {Nothing}, frames = finalFrames[[;; i - 1]]];
+   
+   If[dot == False,
+    
+    Show[ 
+     Plot[Sin[x], {x, -\[Pi], 3 \[Pi]}, 
+      PlotRange -> {{-.6, 7}, {-1.5, 1.5}}], frames, 
+     func[x0, \[CapitalDelta]y, \[CurlyEpsilon]], 
+     Background -> Black, AxesStyle -> White, 
+     Ticks -> {x0labs, {-1, 1}}],
+    
+    Show[ 
+     Plot[Sin[x], {x, -\[Pi], 3 \[Pi]}, 
+      PlotRange -> {{-0.6, 7}, {-1.5, 1.5}}, 
+      PlotStyle -> Opacity[op]], 
+     Graphics[{Opacity[op], PointSize[.015], Green, 
+       Point[{x0, Cos[x0]}] }], frames, Background -> Black, 
+     AxesStyle -> White, Ticks -> {x0labs, {-1, 1}}]
+    
+    ]
+   
+   ];
+   
+   Clear[movetoderiv]
+
+movetoderiv[x0_, i_: 1] := Module[{dot, deriv},
+  
+  
+  Table[
+   
+   If[\[CapitalDelta]y == Cos[x0] - Sin[x0], dot = True, 
+    dot = False];
+   
+   makeline[x0, \[CapitalDelta]y, 
+    E^(-2 Abs[\[CapitalDelta]y]) ((
+      Abs[Cos[x0] - Sin[x0]] - Abs[\[CapitalDelta]y])/(
+      Abs[Cos[x0] - Sin[x0]] + 10^(-10))), dot , i]
+   
+   , {\[CapitalDelta]y, 0, Cos[x0] - Sin[x0] , (Cos[x0] - Sin[x0])*.1}]
+  ]
+  
+  Clear[initLine]
+
+initLine[x0_, i_: 1] := 
+ Table[makeline[x0, 0, \[CurlyEpsilon], False, 
+   i], {\[CurlyEpsilon], .01, 1, .05}]
+   
+   Clear[animAtX]
+   
+
+animAtX[x0_, i_: 1] := Module[{frames},
+   
+   Join[ Join[ initLine[x0, i] , 
+     Table[ initLine[x0, i][[-1]], {k, 0, 1, .2} ]  ]  , 
+    movetoderiv[x0, i] ]
+   
+   ];
+   
+
+finalFrames = makeline[#, 0, 0, True, 1] & /@ x0s ;
+
+finals[op_] := makeline[#, 0, 0, True, 1, op] & /@ x0s ;
+
+tabs = Table[ animAtX[x0s[[i]], i] , {i, 1, Length[x0s]}];
+
+end = Table[  
+    Show[  finals[1 - upp/(3 \[Pi])], 
+     Plot[Cos[x], {x, 0, upp} , 
+      PlotRange -> {{-0.6, 7}, {-1.5, 1.5}}, PlotStyle -> Green, 
+      Background -> Black, AxesStyle -> White, 
+      Ticks -> {x0labs, {-1, 1}}]]
+    
+    , {upp, 0, 3 \[Pi], .2} ][[2 ;;]]   ;
+    
+    
+Export["test.gif", Join[Flatten[tabs], end], ImageResolution -> 150, 
+ "DisplayDurations" -> .05]
