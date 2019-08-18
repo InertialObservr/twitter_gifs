@@ -1,0 +1,15 @@
+Clear[bod];
+
+bod[a_, b_, \[Delta]_, shift_: 0] := 
+ ParametricPlot[{Sin[a*t + \[Delta]] + shift, Sin[b*t]}, {t, 0, 
+   2 \[Pi]}, Axes -> False, PlotStyle -> Hue[(9 - shift)/11]]
+
+ThreeBods[\[Delta]_] := 
+ Show[bod[1, 1, \[Delta]], bod[1, 2, \[Delta], 4], 
+  bod[1, 3, \[Delta], 8], PlotRange -> {{-2, 10}, {-3, 3}}, 
+  Background -> Black]
+
+bods = Table[ThreeBods[\[Delta]], {\[Delta], 0, 2 \[Pi], 2 \[Pi]/60}];
+
+
+Export["bods.gif", bods, ImageResolution -> 300]
