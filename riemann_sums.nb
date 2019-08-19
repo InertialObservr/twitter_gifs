@@ -1,0 +1,40 @@
+Clear[curves];
+
+curves[f_, xmin_, xmax_, ymax_: 16, step_: .2, epi_: False, op_: 1] :=
+  Module[{epilogue},
+  
+  If[epi == True, 
+   epilogue = 
+    Style[Text[
+      "\!\(\*SuperscriptBox[SubscriptBox[\(\[Integral]\), \(a\)], \(b\
+\)]\)f(x) dx", {1.2, .5}], 18, Darker[Gray, .6], Opacity[op]] , 
+   epilogue = {}];
+  
+  Show[DiscretePlot[f[x], {x, xmin, xmax, step}, 
+    PlotRange -> {{xmin, xmax}, {0, ymax}}, PlotRangeClipping -> True,
+     ExtentSize -> Center, PlotStyle -> {Lighter[Blue, .6]}, 
+    ExtentElementFunction -> ({EdgeForm[
+         Opacity[(step - .005)/(.2 - .01), Black]], 
+        Rectangle @@ Transpose@#} &)], 
+   Plot[f[x], {x, xmin, xmax}, PlotStyle -> {Green, Thick}] , 
+   Background -> Black, AxesStyle -> White, 
+   AxesLabel -> {"x", "f(x)"}, 
+   LabelStyle -> Directive[White, 14, Italic], Ticks -> None, 
+   Epilog -> {epilogue}]
+  
+  ]
+
+
+recs = Table[
+   curves[-#^3 + 2 #^2 & , 0, 2.2, 1.5, n], {n, .25, .005, -.01}];
+
+durs = Join[ (.5 & /@ Range[25]), .05 & /@ Range[41] ];
+
+
+Export["riemann.gif", 
+ Join[ recs, 
+  Table[ curves[-#^3 + 2 #^2 & , 0, 2.2, 1.5, .005, True, op/1], {op, 
+    0, 2, .05} ] ], ImageResolution -> 200, 
+ "DisplayDurations" -> Join[durs[[;; -2]] , {2}] , 
+ "AnimationRepetitions" -> Infinity]
+
