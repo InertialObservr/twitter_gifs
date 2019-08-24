@@ -1,0 +1,125 @@
+Clear[curve, bound, fade, rbound, rcurve];
+
+fade[ op_, point_: {.9, 1.2}, label_: "f(x)", color_: White, 
+  size_: 20] := Module[ {epi},
+  If[op == 0 , epi = {}, 
+   epi = {Style[Text[label, point], color, size, Opacity[op]]}];
+  Return[epi];
+  ]
+
+curve[final_: 2.2, op_: 1, ticks_: True] :=  Module[{tck},
+   
+   If[ticks, 
+    tck = { { {  None }, None } , { {  {0, "a"} , {2, "b"}  }, 
+       None }  }, tck = False];
+   
+   Plot[-x^3 + 2 x^2, {x, 0, final}, 
+    PlotRange -> {{0, 2.2}, {0, 1.4}}, Filling -> Axis, 
+    PlotStyle -> {None}, Background -> Black, FrameStyle -> White, 
+    Frame -> ticks, FillingStyle -> {Opacity[op, Lighter[Blue, .6]]}, 
+    FrameTicks -> tck, Axes -> False]
+   ];
+
+rcurve[final_: 2.2, op_: 1, shift_: 2, ticks_: True] := Module[{tck},
+   
+   If[ticks, 
+    tck = { { {  None }, None } , { {  {0, "a"} , {2, "b"}  }, 
+       None }  }, tck = False];
+   
+   Plot[-(shift - x)^3 + 2 (shift - x)^2, {x, 0, final}, 
+    PlotRange -> {{0, 2.2}, {0, 1.4}}, Filling -> Axis, 
+    PlotStyle -> {None}, Background -> Black, FrameStyle -> White, 
+    Frame -> ticks, FillingStyle -> {Opacity[op, Lighter[Blue, .6]]}, 
+    FrameTicks -> tck, Axes -> False]
+   ];
+
+
+
+bound[final_: 2, op_: 0, total_: 1, ticks_: True] := Module[{epi, tck},
+   epi = fade[op];
+   If[ticks, 
+    tck = { { {  None }, None } , { {  {0, "a"} , {2, "b"}  }, 
+       None }  }, tck = False];
+   Plot[-x^3 + 2 x^2, {x, 0, final}, 
+    PlotRange -> {{0, 2.2}, {0, 1.4}}, Background -> Black, 
+    FrameStyle -> White, Frame -> ticks, 
+    PlotStyle -> Opacity[total, Green], FrameTicks -> tck, 
+    FrameTicksStyle -> { {Automatic, None}, Directive[White, 16]}, 
+    Epilog -> epi, Axes -> False]
+   ];
+
+rbound[final_: 2, shift_: 2, color_: Orange, op_: 0, 
+   ticks_: True] := 
+  Module[{epi, tck},
+   If[ticks, 
+    tck = { { {  None }, None } , { {  {0, "a"} , {2, "b"}  }, 
+       None }  }, tck = False];
+   epi = fade[op, {1.2, 1.2}, "f(a+b-x)"];
+   Plot[-(shift - x)^3 + 2 (shift - x)^2, {x, 0, final}, 
+    PlotRange -> {{0, 2.2}, {0, 1.4}}, Background -> Black, 
+    FrameStyle -> White, Frame -> ticks, FrameTicks -> tck, 
+    FrameTicksStyle -> { {Automatic, None}, Directive[White, 16]}, 
+    Epilog -> epi, PlotStyle -> color, Axes -> False ]
+   ];
+
+
+Clear[show, rshow];
+
+show[final_: 2, fOp_: 1, intOp_: 0, op_: 1, ticks_: True] := 
+ Module[{intLab},
+  
+  Show[   curve[final, op, ticks], bound[2, 1, op, ticks] , 
+   FrameTicksStyle -> { {Automatic, None}, Directive[White, 16]} , 
+   Epilog -> {fade[fOp], 
+     fade[intOp, {1.2, .5}, 
+      "\!\(\*SuperscriptBox[SubscriptBox[\(\[Integral]\), \(a\)], \(b\
+\)]\)f(x) dx", Darker[Gray, .6]]}]
+  
+  
+  ]
+
+
+rshow[final_: 2, fOp_: 1, intOp_: 0, op_: 1, shift_: 2, 
+  ticks_: True] :=
+ Module[{intLab},
+  Show[   rcurve[final, op, shift, ticks], 
+   rbound[2, shift, Orange, op, ticks] , 
+   FrameTicksStyle -> { {Automatic, None}, Directive[White, 16]} , 
+   Epilog -> {fade[fOp, {1.2, 1.2}, "f(a+b-x)"], 
+     fade[intOp, {.75, .45}, 
+      "\!\(\*SuperscriptBox[SubscriptBox[\(\[Integral]\), \(a\)], \(b\
+\)]\)f(a+b-x) dx", Darker[Gray, .6], 20]}]
+  
+  
+  ]
+  
+  
+  \[Delta] = 10^(-10);
+  
+  f1 = Table[bound[fin], {fin, \[Delta], 2, (2 - \[Delta])/30}];
+fade1 = Table[bound[2, op], {op, 0, 1, .5}];
+fill = Table[show[fin], {fin, \[Delta], 2, (2 - \[Delta])/30}];
+fade2 = Table[ show[2, 1, op], {op, 0, 1, .2}];
+pause = Table[fade2[[-1]], {x, 0, 1, .1}];
+fadeout = Table[ show[2, op, op], {op, 1, 0, -.2}];
+newcurve = 
+  Table[Show[fadeout[[-1]], rbound[fin, 2, Orange] ], {fin, \[Delta], 
+    2, (2 - \[Delta])/30}  ];
+pause2 = Table[newcurve[[-1]], {x, 0, 1, .1}];
+fade3 = Table[ 
+   Show[ show[2, 0, 0, 1 - op], rbound[2, 2, Orange, op]], {op, 0, 
+    1, .2}];
+
+fadein = Table[ Show[rbound[2, 2, Orange, op]], {op, 0, 1, .2}];
+
+fill2 = Table[
+   Show[ rshow[fin, 1, 0, 1]], {fin, \[Delta], 2, (2 - \[Delta])/30}];
+
+fade4 = Table[Show[ rshow[2, 1, op, 1]], {op, 0, 1, .2}];
+
+pauselast = Table[fade4[[-1]], {x, 0, 3, .1}];
+
+Export["f1.gif", 
+ Join[f1, fade1, fill, fade2, pause, fadeout, newcurve, pause2, fade3,
+   fadein, fill2, fade4, pauselast], 
+ "AnimationRepetitions" -> Infinity, ImageResolution -> 150]
