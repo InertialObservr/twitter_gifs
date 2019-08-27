@@ -1,0 +1,35 @@
+f[x_, n_] := 2 Sum[(-1)^(k + 1)*Sin[k*x]/k, {k, 0, n}]
+
+Clear[fourier, yx];
+
+yx = Plot[x, {x, -\[Pi], \[Pi]}, Frame -> True, Axes -> False, 
+   Background -> Black, PlotStyle -> White, FrameTicksStyle -> White, 
+   PlotRange -> {{-\[Pi], \[Pi]}, {-4, 4}}];
+
+fourier[n_] := 
+  Plot[f[x, n], {x, -\[Pi], \[Pi]}, Frame -> True, Axes -> False, 
+   Frame -> True, Axes -> False, Background -> Black, 
+   PlotStyle -> Hue[n/110], FrameTicksStyle -> White, 
+   PlotRange -> {{-\[Pi], \[Pi]}, {-4, 4}}];
+
+Clear[show];
+show[ n_] := 
+ Show[yx, fourier[n] , 
+  Epilog -> 
+   Style[Text[
+     "2\!\(\*UnderoverscriptBox[\(\[Sum]\), \(k = 1\), \(\(\\\ \
+\)\(N\)\)]\) (-1\!\(\*SuperscriptBox[\()\), \(k + \
+1\)]\)\!\(\*FractionBox[\(sin \((k\\\ x)\)\), \(k\)]\)" <> 
+      "       (N=" <> ToString[n] <> ")", {-1, 2.9} ], White, 12, 
+    FontFamily -> "Times"] ] 
+    
+    
+
+fors = Table[show[final], {final, 1, 100}];
+
+Export["fourier.gif", Join[fors, Reverse[fors]] , 
+ ImageResolution -> 200, 
+ "DisplayDurations" -> 
+  Join[.5 & /@ Range[9], {2}, .05 & /@ Range[89], {2}, .05 & /@ 
+    Range[89], {.5, .5, .5, .5, .5, .5, .5, .5, .5, .5, 2}], 
+ "AnimationRepetitions" -> Infinity   ]
