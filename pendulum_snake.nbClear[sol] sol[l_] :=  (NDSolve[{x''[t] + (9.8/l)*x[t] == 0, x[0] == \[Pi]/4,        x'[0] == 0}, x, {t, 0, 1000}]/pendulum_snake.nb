@@ -1,0 +1,40 @@
+Clear[sol]
+sol[l_] :=
+ (NDSolve[{x''[t] + (9.8/l)*x[t] == 0, x[0] == \[Pi]/4, 
+      x'[0] == 0}, x, {t, 0, 1000}] // Flatten)[[1, 2]]
+Clear[pend, r]
+r[t_, l_] := Module[{\[Omega]},
+   \[Omega] = Sqrt[9.8/l];
+   
+    l { Sin[sol[l][t]], -Cos[sol[l][t]]}
+   
+   ];
+   
+
+pend[t_, l_] := 
+ Graphics3D[{  
+   lin[t, l], {Hue[l/.205], Sphere[ Join[r[t, l], {-l}] , .015]}  }]
+   
+  lin[t_, l_: .5] := { Thickness[.008], Gray, 
+  Line[{{0, 0, -l}, Join[r[t, l], {-l}]}]  }   
+ 
+ 
+ 
+Clear[plot, pends, pl]
+
+
+pends[t_] :=  {pend[t, .388], pend[t, .358 ], pend[t, .331], 
+   pend[t, .307],  pend[t, .285],  pend[t, .266],  pend[t, .248], 
+   pend[t, .233], pend[t, .218],  pend[t, .205]} ;
+
+
+pl[t_] := Show[  Reverse[pends[t]] , (*Graphics3D[{White,Polygon[{{0,
+  0,-1} , {0,1,1}}] }  ],*) 
+  PlotRange -> {{-.4, .4}, {-.43, 0}, {-1, 1}} , 
+  ViewPoint -> {0, 0, -1}, Background -> Darker[Brown, 1]]
+
+
+pe = Table[  pl[k] , {k, 0, 30, .025} ];
+
+Export["pends.gif", pe, ImageResolution -> 200, 
+ "DisplayDurations" -> .05]
