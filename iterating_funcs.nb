@@ -1,0 +1,35 @@
+func[x_, n_: 50, fun_: (Sin[Cos[Tan[#]]] &)] := 
+ NestList[fun, x, n][[2 ;;]]
+ 
+ flist = func[x];
+ 
+ Clear[funcs];
+funcs[j_, op_, label_: False] := Module[{epi},
+   
+   
+   
+   
+   Plot[ func[x][[j]], {x, 0, \[Pi]}, PlotStyle -> {Hue[ E^(-j/15)]}, 
+    PlotRange -> {{0, \[Pi]}, {-1, 1.2}}, Background -> Black, 
+    Frame -> True, FrameStyle -> White, Epilog -> epi
+    ]
+   ];
+
+
+graphs = (funcs[#, 1, True] & /@ Range[1, Length[flist], 1]);
+
+anim = Table[Show[graphs[[;; j]], Epilog -> { Style[Text[ToString[
+\!\(\*SuperscriptBox[\(ToString[sin[cos[tan \((x)\)]]]\), \("\<(\>" <> 
+            ToString[
+             NumberForm[j - 1, {2, 1}, 
+              NumberPadding \[Rule] {"\<0\>"}, \ 
+              NumberPoint \[Rule] "\<\>"]\ ] <> \ "\<)\>"\)]\) // 
+          TraditionalForm], {\[Pi]/2, 1.02}], 25, White, 
+       FontFamily -> "Times" ],
+      Style[Text["@InertialObservr", {2.8, -.85}], 8, 
+       Lighter[Green, .8], FontFamily -> "Georgia" ]}, 
+    Axes -> False] , {j, 1.00, Length[graphs] } ];
+    
+    Export["tansin.gif", Join[anim, Reverse[anim]],   
+ "AnimationRepetitions" -> Infinity , ImageResolution -> 250, 
+ "DisplayDurations" -> .05 ]
