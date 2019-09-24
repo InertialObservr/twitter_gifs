@@ -1,0 +1,80 @@
+Clear[pt, point, line]
+pt[t_, phase_, \[Theta]_, \[CurlyPhi]_  ] := {Cos[t - phase]*
+   Sin[\[Theta]] Cos[\[CurlyPhi]], 
+  Cos[t - phase]*Sin[\[Theta]] Sin[\[CurlyPhi]], 
+  Cos[t - phase]* Cos[\[Theta]] }
+
+(*plot[t_, \[Theta]_, \[CurlyPhi]_, \[Delta]_:0]:=Graphics3D[{Hue[\
+\[CurlyPhi]/2\[Pi]],Sphere[pt[t,\[Delta],\[Theta],\[CurlyPhi]], .06]} \
+ ,PlotRange\[Rule]{{-1.5,1.5}, {-1.5,1.5}, {-1.5,1.5}}, \
+SphericalRegion\[Rule]True, Boxed->False, Background\[Rule]Black, \
+ViewPoint\[Rule]{0,1,1}]*)
+
+tabPlots[t_, \[Delta]_: 0, z_: 1] := 
+ Flatten[ Table[
+   plot[t, \[Pi]/2, \[CurlyPhi], \[Delta], z], {\[CurlyPhi], 0, 
+    2 \[Pi], 2 \[Pi]/4} ]]
+    
+Clear[R]
+R[\[Theta]_] := RotationMatrix[\[Theta], {0, 0, 1}]
+
+
+line[ \[Delta]_, \[CurlyPhi]_, \[Theta]_: \[Pi]/2, view_: {0, 0, 2}, 
+  op_: 0] := Graphics3D[ { Thick, Darker[White, .5], Opacity[op], 
+   Line[ {pt[\[Delta], \[Delta], \[Theta], \[CurlyPhi]] , 
+     pt[\[Delta] + \[Pi], \[Delta], \[Theta], \[CurlyPhi]]}]}, 
+  Axes -> False, 
+  PlotRange -> {{-1.5, 1.5}, {-1.5, 1.5}, {-1.5, 1.5}}, 
+  Background -> Black, Boxed -> False]
+
+
+point[t_, \[Delta]_, \[CurlyPhi]_, \[Theta]_: \[Pi]/2, 
+  view_: {0, 0, 2}] := 
+ Graphics3D[ {Hue[\[Delta]/\[Pi]], 
+   Sphere[pt[t, \[Delta], \[Theta], \[CurlyPhi]], .04]}, 
+  Axes -> False, ViewVector -> {view, {0, 0, 0}}, 
+  PlotRange -> {{-1.5, 1.5}, {-1.5, 1.5}, {-1.5, 1.5}}, 
+  Background -> Black, Boxed -> False]
+  
+  Clear[plot]
+
+phis =  Range[0, 2 \[Pi], 2 \[Pi]/20][[2 ;;]];
+delts = Join[(-\[Pi]) & /@ Range[10], (\[Pi]) & /@ Range[10] ];
+
+ptfin = {-(1/2), Sqrt[3]/2, 1};
+fin = 2 {1/Sqrt[2], -(1/Sqrt[2]), 0};
+p0 = {0, 0, 2};
+
+c\[Theta] = (fin - p0).p0/Sqrt[(fin - p0).(fin - p0)* p0.p0] // ArcCos
+
+plot[t_, view_: {0, 0, 5}, op_: 0] := 
+ Show[(point[t, #, #, \[Pi]/4, view] & /@ 
+     Range[0, \[Pi], 2 \[Pi]/20])[[
+   2 ;;]] , (line[ #, #, \[Pi]/4, view, op] & /@ 
+    Range[0, 2 \[Pi], 2 \[Pi]/20]), Boxed -> True , 
+  ViewVertical -> {0, 0, 1}, 
+  Epilog -> 
+   Text[Style["@InertialObservr" , 10, Lighter[Green, .7], 
+     FontFamily -> "Georgia"],  {.84, .03}], ViewAngle -> Pi/3.4, 
+  ImageSize -> Medium]
+  
+  initPer = Table[plot[t], {t, 0, 2 \[Pi], 2 \[Pi]/200}];
+zoom = Table[
+   plot[t, {0, 0, 5 - (3*t)/(2 \[Pi])}], {t, 0, 2 \[Pi], 2 \[Pi]/200}];
+singleNewRot = Table[plot[t, p0], {t, 0, 2 \[Pi], 2 \[Pi]/200}];
+
+
+newPt = Table[
+   plot[t, R[-\[Pi]/4].(p0 + t/(2 \[Pi])*(fin - p0))], {t, 0, 
+    2 \[Pi], 2 \[Pi]/200}];
+
+newFinRot = Table[plot[t, {0, 2, 0}], {t, 0, 2 \[Pi], 2 \[Pi]/150}];
+fadeIn =   
+  Table[plot[t, {0, 2, 0}, (2*t)/\[Pi]], {t, 0, 4 \[Pi], 
+    2 \[Pi]/150}];
+    
+intStr = IntegerString[#, 10, 4] & /@ Range[Length[frames]];
+
+frames = Join[ newFinRot, fadeIn];
+
+Export["lines.gif", frames, ImageResolution -> 200]
