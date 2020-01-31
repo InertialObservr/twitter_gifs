@@ -20,10 +20,18 @@ right[x0_, y0_, x1_: 5, x2_: 5.5, shift_: {0, 0}, color_: White] :=
 
 Clear[drawAll];
 
-drawAll[overallShift_: {0, 0}, color_: White] := 
- Module[{\[Theta] = \[Pi]/10, x0, y0, initLvert = ({0, 1}), LC, UC, 
-   bot, righ, xfinalb = 4 + overallShift[[1]], 
-   xfinalu = 4.5 + overallShift[[1]]},
+(*\[Theta] is angle of left most intersection*)
+(*xfinb is where to \
+cut the bottom curve*)
+(*xfinu is where to cut the top curve*)
+
+drawAll[overallShift_: {0, 0}, color_: White, \[Theta]_: \[Pi]/10, 
+  xfinb_: 4, xfinu_: 4.5] := 
+ Module[{ x0, y0, initLvert = ({0, 1}), LC, UC, bot, righ, xfinalb, 
+   xfinalu},
+  
+  xfinalb = xfinb + overallShift[[1]];
+  xfinalu = xfinu + overallShift[[1]];
   
   x0 = ( RotationMatrix[\[Theta]].initLvert)[[1]] + overallShift[[1]] ;
   y0 = ( RotationMatrix[\[Theta]].initLvert)[[2]] + overallShift[[2]] ;
@@ -36,6 +44,7 @@ drawAll[overallShift_: {0, 0}, color_: White] :=
   Show[Graphics[LC], Graphics[righ], UC, bot]
   
   ]
+
   
   ill[x_] := 
  Show[drawAll[{0, 0} , Lighter[Blue, .3]], 
