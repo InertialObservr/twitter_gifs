@@ -1,0 +1,45 @@
+Clear[left, curve, right, func];
+func[x_, x0_, y0_] := -.1 (x - x0) (x - 5) + y0;
+
+left[\[Theta]_, shift_: {-1, 0}, initLvert_: {0, 1}, 
+   color_: White] := {Thick, color, 
+   Line[{{0, 0} + shift, RotationMatrix[\[Theta]].initLvert + shift}]};
+
+curve[x0_, y0_, xf_, color_: White] := 
+ Plot[func[x, x0, y0], {x, x0, xf}, PlotStyle -> color]
+
+right[x0_, y0_, x1_: 5, x2_: 5.5, shift_: {0, 0}, color_: White] := 
+ Module[{y1, y2},
+  
+  y1 = func[x1, shift[[1]], shift[[2]]];
+  y2 = func[x2, x0, y0];
+  
+  {Thick, color, Line[{{x1, y1}, {x2, y2}}]}
+  
+  ]
+
+Clear[drawAll];
+
+drawAll[overallShift_: {0, 0}, color_: White] := 
+ Module[{\[Theta] = \[Pi]/10, x0, y0, initLvert = ({0, 1}), LC, UC, 
+   bot, righ, xfinalb = 4 + overallShift[[1]], 
+   xfinalu = 4.5 + overallShift[[1]]},
+  
+  x0 = ( RotationMatrix[\[Theta]].initLvert)[[1]] + overallShift[[1]] ;
+  y0 = ( RotationMatrix[\[Theta]].initLvert)[[2]] + overallShift[[2]] ;
+  
+  LC = left[\[Theta], overallShift, initLvert, color];
+  UC = curve[x0, y0, xfinalu , color];
+  bot = curve[overallShift[[1]], overallShift[[2]], xfinalb, color];
+  righ = right[x0, y0, xfinalb, xfinalu, overallShift, color];
+  
+  Show[Graphics[LC], Graphics[righ], UC, bot]
+  
+  ]
+  
+  ill[x_] := 
+ Show[drawAll[{0, 0} , Lighter[Blue, .3]], 
+  drawAll[{x, -2.5 x}, Lighter[ Red, .1]], Background -> Black, 
+  PlotRange -> {{-1, 5.5}, {-2.5, 2.5}}]
+  
+  Manipulate[ill[x], {x, .6, 0}]
