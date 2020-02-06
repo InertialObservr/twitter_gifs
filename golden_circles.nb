@@ -6,9 +6,9 @@ r[ta_, Ra_, Rb_] := Module[{},
 \[CurlyPhi] = 1/GoldenRatio;
 
 
-Clear[r20, r32, rn];
+Clear[rn, rps];
 
-(*rn is for nested circles; rs is for limiting case*)
+(*rn is for nested circles; rptss is for limiting case*)
 
 rn[t_, nmax_: 5] := 
  Graphics[{Hue[nmax/8], 
