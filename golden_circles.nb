@@ -1,0 +1,44 @@
+r[ta_, Ra_, Rb_] := Module[{},
+  -(Rb - Ra)*{Sin[ta], Cos[ta]}
+  ]
+
+
+\[CurlyPhi] = 1/GoldenRatio;
+
+
+Clear[r20, r32, rn];
+
+(*rn is for nested circles; rs is for limiting case*)
+
+rn[t_, nmax_: 5] := 
+ Graphics[{Hue[nmax/8], 
+   Circle[Sum[ 
+     r[t/\[CurlyPhi]^n, \[CurlyPhi]^n, \[CurlyPhi]^(n - 1)], {n, 1, 
+      nmax}], \[CurlyPhi]^nmax]}]
+
+rpts [t_, nmax_: 5] := 
+  Sum[ r[t/\[CurlyPhi]^n, \[CurlyPhi]^n, \[CurlyPhi]^(n - 1)], {n, 1, 
+    nmax}];
+
+
+
+Clear[rots, rs]
+(* rs is for the limiting case *)
+rots[t_] := rn[t, #] & /@ Range[8];
+rs[t_] := rpts[t, 50];
+
+Manipulate[
+ Show[rots[t], Background -> Darker[Gray, .8]], {t, 0, 19.257}]
+
+dat = Table[
+   Show[rots[t], Background -> Darker[Gray, .8]] , {t, 0, 19.257, 
+    19.257/1000}];
+
+
+Export["golden.gif", dat, ImageResolution -> 200, 
+ "AnimationRepetitions" -> Infinity]
+
+
+plt = ParametricPlot[rs[t], {t, 0, 500}, PlotPoints -> 1000, 
+  PlotStyle -> Thickness[.001], Axes -> None, 
+  Background -> Darker[Gray, .8]]
