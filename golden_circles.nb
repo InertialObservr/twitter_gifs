@@ -8,7 +8,7 @@ r[ta_, Ra_, Rb_] := Module[{},
 
 Clear[rn, rpts];
 
-(*rn is for nested circles; rptss is for limiting case*)
+(*rn is for nested circles; rpts is for limiting case*)
 
 rn[t_, nmax_: 5] := 
  Graphics[{Hue[nmax/8], 
