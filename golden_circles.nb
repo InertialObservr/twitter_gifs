@@ -6,7 +6,7 @@ r[ta_, Ra_, Rb_] := Module[{},
 \[CurlyPhi] = 1/GoldenRatio;
 
 
-Clear[rn, rps];
+Clear[rn, rpts];
 
 (*rn is for nested circles; rptss is for limiting case*)
 
