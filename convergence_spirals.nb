@@ -1,0 +1,35 @@
+toXY[z_] := {Re[z], Im[z]};
+toComplex[{x_, y_}] := x + I y;
+
+
+f[pt_] :=
+ Show[Graphics[{
+    Thickness[.003],
+    Lighter[Hue[Norm[pt]/Sqrt[2^2 + 1.5^2], .5]],
+    Line[toXY /@ 
+      NestList[If[0 < Norm[#] < 5, toComplex[pt]^#, #] &, 1, 150]]},
+   PlotRange -> {{-.5, 2}, {0, 2}}, Background -> Black, Axes -> True,
+    AxesStyle -> {{ White, 12, FontFamily -> "Georgia"}, { White, 12, 
+      FontFamily -> "Georgia"}}, AxesLabel -> {"Re", "Im"}  ], 
+  Graphics[{PointSize[.03], Hue[Norm[pt]/Sqrt[2^2 + 1.5^2]], 
+    Point[pt]}], 
+  Epilog -> 
+   Style[Text["@InertialObservr", {1.85, 2.1}], 10, 
+    FontFamily -> "Georgia", Lighter[Green, .7]] ]
+    
+p0 = {1.4, 0};
+p1 = {1.4, 1.76};
+p2 = {0, 1.76};
+p3 = {0, 1};
+p5 = {.5, 0};
+
+path0 = f /@ ({1.4, #} & /@ Range[0, 1.76, .01]);
+
+path1 = f /@ ({#, 1.76} & /@ Range[1.4, 0, -.01]);
+
+path2 = f /@ ({0, #} & /@ Range[1.76, 1, -.01]);
+
+path3 = f /@ ({#, -2 # + 1} & /@ Range[0, .5, .01]);
+
+Export["p0.gif", Join[path0, path1, path2, path3], 
+ "AnimationRepetitions" -> Infinity, ImageResolution -> 200]
