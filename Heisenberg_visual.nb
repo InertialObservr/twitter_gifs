@@ -1,0 +1,54 @@
+Clear[\[CapitalPsi], \[CapitalPhi], i];
+\[CapitalPsi][x_, a_: 1] := Sqrt[1/(a*Sqrt[\[Pi]])]*Exp[-x^2/(2 a^2)];
+
+\[CapitalPhi][p_, a_] := \[Pi]^(1/4)/Sqrt[2 \[Pi]] Sqrt[2]*Sqrt[
+  Abs[a]]*E^(-(1/2) a^2 p^2)
+
+
+<< MaTeX`;
+
+SetOptions[MaTeX, 
+ "Preamble" -> {"\\usepackage{color,txfonts}", 
+   "\\usepackage[dvipsnames]{xcolor}"}]
+   
+Clear[\[Psi]plot, \[CurlyPhi]plot];
+
+\[Psi]plot[a_: .5] := 
+  Labeled[Quiet@
+    Plot[\[CapitalPsi][x, a], {x, -10, 10}, 
+     PlotRange -> {{-10, 10}, {0, 1.5}}, Ticks -> None, 
+     AxesLabel -> {MaTeX["\\color{white} x", "FontSize" -> 18], 
+       MaTeX["\\color{white} |\\Psi(x)|^2", "FontSize" -> 18]}, 
+     PlotStyle -> {Thick, ColorData["TemperatureMap"][(a - .3)/2]}, 
+     Background -> Black],
+   Style["Position Space       ", FontFamily -> "Georgia", White, 12]];
+
+\[CurlyPhi]plot[a_] := 
+  Labeled[Quiet@
+    Plot[\[CapitalPhi][p, a], {p, -10, 10}, 
+     PlotRange -> {{-10, 10}, {0, 1.5}}, Ticks -> None, 
+     AxesLabel -> {MaTeX["\\color{white} p", "FontSize" -> 18], 
+       MaTeX["\\color{white} |\\Phi(p)|^2", "FontSize" -> 18]}, 
+     PlotStyle -> {Thick, 
+       ColorData["TemperatureMap"][1 - (a - .3)/2]}, 
+     Background -> Black], 
+   Style["Momentum Space       ", FontFamily -> "Georgia", White, 
+    12]];
+    
+    
+ Manipulate[
+ GraphicsRow[{\[Psi]plot[a], \[CurlyPhi]plot[a]}, 
+  Background -> Black], {a, .3, 3}]
+  
+  
+Clear[double]
+double[a_] := 
+ GraphicsRow[{\[Psi]plot[a], \[CurlyPhi]plot[a]}, 25, 
+  Background -> Black]
+  
+  
+  
+dat = double /@ Range[.3, 3, .1];
+
+Export["heis.gif", Join[dat, Reverse[dat]], ImageResolution -> 300, 
+ "AnimationRepetitions" -> Infinity]
