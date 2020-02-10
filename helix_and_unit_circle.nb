@@ -1,0 +1,34 @@
+In[1325]:= Clear[plt]
+plt[tf_] :=
+ 
+ Show[ParametricPlot3D[{1 +  Cos[t], t, 1 +  Sin[t]}, {t, 0, tf}, 
+   ColorFunction -> (Opacity[1 - #2/4 \[Pi], White] &), 
+   PlotPoints -> 100, PlotStyle -> Thickness[.01]] ,
+  ParametricPlot3D[{1 + Cos[t], t, -1.2}, {t, 0, tf}, 
+   ColorFunction -> (Opacity[1 - #2/4 \[Pi], Green] &), 
+   PlotStyle -> Thickness[.01]],
+  ParametricPlot3D[{-1.2, t, 1 + Sin[t]}, {t, 0, tf}, 
+   ColorFunction -> (Opacity[1 - #2/4 \[Pi], Orange] &), 
+   PlotStyle -> Thickness[.01]], Graphics3D[{Lighter[Blue, .6], p1}], 
+  Graphics3D[p2],
+  PlotRange -> {{-1.2, 3}, {0, 4 \[Pi]}, {-1.2, 3}}, 
+  ViewPoint -> 3 {.1, -1, .04} , Background -> Black, Axes -> False, 
+  Boxed -> False, AxesLabel -> {"x", "y", "z"}, ViewAngle -> Pi/20, 
+  Epilog -> 
+   Style[Text["@InertialObservr", {.73, .88}], Lighter[Green, .7], 
+    FontFamily -> "Georgia"]
+  ]
+
+
+In[1300]:= 
+p1 = Polygon[{{-1.3, 0, -1.3}, {-1.3, 4 \[Pi], -1.3}, {3, 
+     4 \[Pi], -1.3}, {3, 0, -1.3}}];
+p2 = Polygon[{{-1.3, 0, -1.3}, {-1.3, 4 \[Pi], -1.3}, {-1.3, 4 \[Pi], 
+     3}, {-1.3, 0, 3}}];
+
+
+In[1329]:= Export["helix.gif", 
+ plt /@ Range[.00001, 4 \[Pi], 4 \[Pi]/100], 
+ "AnimationRepetitions" -> Infinity, ImageResolution -> 300]
+
+Out[1329]= "helix.gif"
