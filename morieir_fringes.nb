@@ -1,0 +1,26 @@
+lines[t_, 
+   n_] := {Black, 
+    Line /@ ({RotationMatrix[t].# & /@ {{-1, #}, {1, #}}, 
+         RotationMatrix[t].# & /@ {{#, -1}, {#, 1}}} & /@ 
+       Range[-1, 1, 2/n])} // Graphics;
+
+lines[0, 50]
+
+
+gif = Table[
+   Show[{lines[0, 40], lines[-2 \[Pi]/3 Cos[t], 40], 
+     lines[+2 \[Pi]/3 Cos[t], 40]}, 
+    PlotRange -> {{-1.5, 1.5}, {-1.5, 1.5}}, ImageSize -> 200, 
+    Epilog -> 
+     Style[Text["@InertialObservr", {1.15, -1.45}], Black, 
+      6] ], {t, -\[Pi]/2, \[Pi]/2 - \[Pi]/70, \[Pi]/70}];
+
+
+
+Export["morie.gif", gif, "AnimationRepetitions" -> Infinity, 
+ ImageResolution -> 200]
+
+Show[ lines[#, 40] & /@ Range[0, \[Pi] - \[Pi]/3, \[Pi]/3] , 
+ Background -> LightBrown, 
+ Epilog -> Style[Text["@InertialObservr", {1.09, -1.4}], Black, 6] , 
+ ImageSize -> 200 ]
