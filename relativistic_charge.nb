@@ -1,0 +1,91 @@
+Clear[e]
+e[x_, y_, z_, t_] := 
+ Module[{r, r0, tR, \[Beta], R, z0 = Cos(*x0=Cos*), \[Gamma], e, pl, 
+   phiD, nhat, elec},
+  
+  r = {x, y, 0};
+  r0[\[Tau]_] := {0, z0[\[Tau]*.9], 0};
+  
+  nhat[\[Tau]_, rd_: r] := (rd - r0[\[Tau]])/(
+   Sqrt[(rd - r0[\[Tau]] ).(rd - r0[\[Tau]] )] + .001);
+  \[Beta] [\[Tau]_] := r0'[\[Tau]];
+  \[Gamma] [\[Tau]_] := 1/Sqrt[1 - \[Beta][\[Tau]].\[Beta][\[Tau]]];
+  tR = (FindRoot[(tr - t)^2 == r.r + r0[tr].r0[tr] - 2 r.r0[tr], {tr, 
+        t - 20} ] // Flatten)[[1, 2]];
+  
+  R = {X, Y, 0};
+  
+  elec = -Grad[ 
+      10/((1 - nhat[tR, R].\[Beta][tR])*
+        Sqrt[(R - r0[tR]).(R - r0[tR])] + .001), {X, Y}] /. {X -> x, 
+     Y -> y};
+  
+  
+  
+  
+  
+  
+  Return[{elec[[1]], elec[[2]]}]
+  
+  
+  ]
+
+Clear[\[CurlyPhi]]
+\[CurlyPhi][x_, y_, z_, t_] := 
+ Module[{r, r0, \[Beta], z0 = Cos(* x0=Cos*), \[Gamma], tR, e, nhat, 
+   phi, plt},
+  r = {x, y, 0};
+  r0[\[Tau]_] := {0, z0[\[Tau] *.9], 0};
+  
+  nhat[\[Tau]_] := (r - r0[\[Tau]])/(Norm[r - r0[\[Tau]]] + .001);
+  \[Beta] [\[Tau]_] := r0'[\[Tau]];
+  \[Gamma] [\[Tau]_] := 1/Sqrt[1 - \[Beta][\[Tau]].\[Beta][\[Tau]]];
+  
+  tR = (FindRoot[(tr - t)^2 == r.r + r0[tr].r0[tr] - 2 r.r0[tr], {tr, 
+        t - 20} ] // Flatten)[[1, 2]];
+  
+  
+  phi = 10/((1 - nhat[tR].\[Beta][tR])*(Norm[r - r0[tR]]) + .001) ;
+  
+  
+  Return[phi]
+  
+  
+  ]
+
+
+pl[ 4 \[Pi]/.9 + 1 ]
+
+
+
+(*Worked in limiting case .. *)
+
+Clear[pl]
+pl[t_] := Show[
+   Clear[pts];
+   pts = Table[{.04 Sin[\[Theta]], .04 Cos[\[Theta]] + 
+       Cos[t*.9]}, {\[Theta], .001, 2 \[Pi], (2 \[Pi] - .001)/20}];
+   
+   ContourPlot[\[CurlyPhi][x, y, 0, t], {x, -2, 2}, {y, -2, 2}, 
+    PlotRange -> 2 {{-1, 1}, {-1, 1}}, 
+    ColorFunction -> 
+     Function[z, Opacity[.6, ColorData["AuroraColors"][z]]], 
+    ContourStyle -> None, Mesh -> False, Contours -> 30, 
+    PlotPoints -> 50, PerformanceGoal -> "Quality", 
+    Method -> {"TransparentPolygonMesh" -> True}],
+   
+   StreamPlot[e[x, y, 0, t], {x, -2, 2}, {y, -2, 2}, 
+    PlotRange -> 2 {{-1, 1}, {-1, 1}}, StreamMarkers -> None, 
+    StreamScale -> None, StreamPoints -> {pts, Automatic, Scaled[1]}, 
+    StreamStyle -> {Opacity[.6, White]}, PerformanceGoal -> "Quality"],
+   
+   Graphics[{PointSize[.07], Lighter[Purple, .4], 
+     Point[{0, Cos[t*.9]}]}] , Frame -> False, Background -> Black, 
+   PlotRange -> {{-2, 2}, {-2, 2}}, 
+   Epilog -> 
+    Style[Text["@InertialObservr", {1.5, -1.9}], White, 
+     FontFamily -> "Georgia"], ImageSize -> Medium ];
+
+Export["rad.gif", 
+ pl /@ Range[(2 \[Pi] )/.9 , (4 \[Pi] )/.9, (2 \[Pi])/.9*1/100], 
+ "AnimationRepetitions" -> Infinity, ImageResolution -> 300]
