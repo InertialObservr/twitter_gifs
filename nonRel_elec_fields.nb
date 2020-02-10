@@ -1,0 +1,23 @@
+efield[x_, y_, x0_, y0_] := 
+ Return[ 1/((x - x0)^2 + (y - y0)^2 )*{x - x0, y - y0}/
+   Norm[{x - x0, y - y0}]]
+
+Clear[plot]
+plot[x0_, y0_, x1_: - 1.2, y1_: 0] := 
+ Show[ VectorPlot[
+   efield[x, y, x0, y0] - efield[x, y, x1, y1] , {x, -2, 2}, {y, -2, 
+    2}, VectorScale -> {0.06, .6, None}, VectorStyle -> White] , 
+  Graphics[{PointSize[.04], Lighter[Blue, .5], Point[{x0, y0}]}], 
+  Graphics[{Lighter[Red, .4], PointSize[.04], Point[{x1, y1}]}] , 
+  Background -> Black, Axes -> False, Frame -> False , 
+  Epilog -> 
+   Style[Text["@InertialObservr", {1.8, -2.3}], Lighter[Green, .7], 
+    FontFamily -> "Georgia" ] ]
+
+
+tab = Table[
+   plot[Cos[\[Theta]], Sin[\[Theta]], Cos[\[Theta] + \[Pi]], 
+    Sin[\[Theta] + \[Pi]]], {\[Theta], 0, 2 \[Pi], 2 \[Pi]/60}];
+
+Export["vecs.gif", tab, "AnimationRepetitions" -> Infinity, 
+ ImageResolution -> 200]
