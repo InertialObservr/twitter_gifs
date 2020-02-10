@@ -1,0 +1,40 @@
+Clear[X, Y]
+k = 2 \[Pi]/3;
+c = Sqrt[9.82/k];
+
+X[a_, b_, t_, k_: k] := a + E^(k*b)/k*Sin[k*(a - c*t)];
+Y[a_, b_, t_, k_: k] := b - E^(k*b)/k*Cos[k*(a - c*t)];
+
+r[b_, k_: k] :=  E^(k*b)/k;
+
+
+ymax = -.3
+ny = 10;
+ys = Table[b, {b, ymax, -2, -(ymax + 2)/ny}];
+
+parts[t_] := 
+  Flatten[Table[
+    Point[{X[a, b, t], Y[a, b, t]}], {a, -4, 4, .4}, {b, 
+     ymax, -2, -(ymax + 2)/ny}], 1];
+
+surf[t_] := Table[{X[a, ymax, t], Y[a, ymax, t]}, {a, -4, 4, .1}];
+bot[t_] := Table[{X[a, -2, t], Y[a, -2, t]}, {a, -4, 4, .4}];
+ledge[t_] := 
+  Table[{X[-4, b, t], Y[-4, b, t]}, {b, ymax, -2, -(ymax + 2)/ny}];
+redge[t_] := 
+  Table[{X[4, b, t], Y[4, b, t]}, {b, ymax, -2, -(ymax + 2)/ny}];
+  
+highlight[t_] := {Orange, PointSize[Medium], 
+   Point[{X[0, ymax, t], Y[0, ymax, t]}], 
+   Circle[{0, ymax}, r[ymax, k] ],
+   Point[{X[0, ys[[4]], t], Y[0, ys[[4]], t]}],  
+   Circle[{0, ys[[4]]}, r[ys[[4]], k] ] };
+   
+show[t_] := 
+  Show[ Graphics[{LightBlue, 
+     Polygon[Join[surf[t], bot[t], ledge[t], redge[t]]]}] , 
+   Graphics[{PointSize[Medium], ColorData[97, 1], parts[t]}],
+   Graphics[highlight[t]], PlotRange -> {2 {-1, 1}, 2 {-1, .1}}];
+   
+   
+Manipulate[show[t], {t, 0, 2 Pi/(k c)} ]
