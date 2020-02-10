@@ -13,7 +13,7 @@ yfoot[x_] := {Yellow, Rectangle[{x, .5 - .1}, {x + .2, .5 - .18}]};
 
 
 Manipulate[
- Show[Graphics@blacks[0], Graphics[greys[.5]], Graphics[bfoot[x]], 
+ Show[Graphics@blacks[0], Graphics@greys[.5], Graphics[bfoot[x]], 
   Graphics[yfoot[x]], Background -> None], {x, 0, 1.5 - .2 + .05}]
   
   
