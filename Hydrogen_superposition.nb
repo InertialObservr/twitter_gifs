@@ -1,0 +1,55 @@
+Clear[rMin, rMax, r, \[Theta], \[Phi], \[Psi], sup];
+
+{rMin[n_, l_], rMax[n_, l_]} = 
+  r /. Simplify[Solve[(l (l + 1))/r^2 - 2/r == -(1/n^2), r], n > 0];
+
+sphericalToCartesian = 
+  Thread[{r, \[Theta], \[Phi]} -> {Sqrt[x^2 + y^2 + z^2], 
+     ArcCos[z/Sqrt[x^2 + y^2 + z^2]], Arg[x + I y]}];
+
+\[Psi][n_, l_, m_, t_][r_, \[Theta]_, \[Phi]_] := 
+ Exp[-I /n^2 *10 t]*
+  Sqrt[(n - l - 1)!/(n + l)!] E^(-(r/n)) ((2 r)/n)^l 2/n^2 LaguerreL[
+   n - l - 1, 2 l + 1, (2 r)/n] SphericalHarmonicY[l, 
+   m, \[Theta], \[Phi]]
+
+sup[n_, l_, m_, t_: 0][
+  r_, \[Theta]_, \[Phi]_] := (\[Psi][n, l, m, t][
+    r, \[Theta], \[Phi]] + \[Psi][4, 1, 0, t][r, \[Theta], \[Phi]])
+
+ClearAll[plotOrbital];
+plotOrbital[f_, range_, contour_, opt : OptionsPattern[]] := 
+ RegionPlot3D[
+  Evaluate[Abs[f[r, \[Theta], \[Phi]] /. sphericalToCartesian]^2 > 
+    contour], {x, -range, range}, {y, -range, range}, {z, -range, 
+   range}, opt, Mesh -> False, PlotPoints -> 40, 
+  Lighting -> "Neutral", PlotTheme -> "Classic"]
+  
+Clear[plot]; 
+plot[n_: 3, l_: 2, m_: 1, 
+  t_: 0] := (Show[
+   Table[plotOrbital[sup[n, l, m, t], 2 n^2, c/n^6, PlotRange -> All, 
+     BoxRatios -> Automatic, 
+     PlotStyle -> 
+      Directive[Opacity[0.6`], 
+       ColorData["TemperatureMap"][c/(.3 - .05)]] ], {c, 0.3`, 
+     0.05`, -0.04`}]]) 
+  
+Clear[crash];
+crash[y_, n_: 5, l_: 4, m_: 2, t_: 0] := 
+ Show[plot[n, l, m, t], Boxed -> False, Background -> Black, 
+  Axes -> False, ViewVector -> {{20, -45, 10}, {0, 0, 2}}, 
+  ViewAngle -> Pi/4.5, 
+  PlotRange -> {{-#, #}, {y*#, #}, {-#, #}} &[2 n^2]]
+  
+  
+rng = Range[0, 39, .001];
+ints = IntegerString[#, 10, 6] & /@ Range[Length[rng]];
+
+count = 1;
+For[ i = 0, i <= 13.5/2, i += .1,
+  Export["./atom2/" <> ToString[ints[[count]]] <> ".png",  
+   crash[0, 3, 2, 0, i], ImageResolution -> 300];
+  count += 1;
+  ];
+  
