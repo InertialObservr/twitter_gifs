@@ -1,0 +1,30 @@
+Clear[blacks, greys];
+blacks[tint_: 0] := 
+  Table[{Lighter[Black, tint], 
+    Rectangle[{x, 0}, {x + .05, 1}]}, {x, .05, 1.5, .1}];
+greys[tint_: 1] := 
+  Table[{Lighter[Gray, tint], Rectangle[{x, 0}, {x + .05, 1}]}, {x, 0,
+     1.5, .1}];
+
+
+bfoot[x_] := {Darker[Blue, .2], 
+   Rectangle[{x, .5 + .1}, {x + .2, .5 + .18}]}; 
+yfoot[x_] := {Yellow, Rectangle[{x, .5 - .1}, {x + .2, .5 - .18}]}; 
+
+
+Manipulate[
+ Show[Graphics@blacks[0], Graphics[greys[.5]], Graphics[bfoot[x]], 
+  Graphics[yfoot[x]], Background -> None], {x, 0, 1.5 - .2 + .05}]
+  
+  
+make[x_, tint_: 1, tintb_: 0] := 
+ Show[Graphics[blacks[tintb]], Graphics[greys[tint]], 
+  Graphics[bfoot[x]], Graphics[yfoot[x]], Background -> None]
+  
+dat = make /@ Range[0, 1.35, 1.35/100];
+run2 = make[#, 1 - #/1.35, .5*#/1.35] & /@ Range[0, 1.35, 1.35/100];
+r2 = Join[run2, Reverse@run2];
+
+
+Export["stepping.gif", Join[dat, Reverse@dat, r2], 
+ ImageResolution -> 100, "AnimationRepetitions" -> Infinity]
