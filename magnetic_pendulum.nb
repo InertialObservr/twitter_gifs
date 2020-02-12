@@ -1,0 +1,162 @@
+l = 20.0;
+
+(*my rendering took n=6000*)
+
+n = 100;
+{tmax, dt} = {25, 0.05};
+{k, c, h} = {0.15, 0.2, 0.2};
+{z1, z2, z3} =  N@Exp[I 2 Pi {1, 2, 3}/3];
+
+z = Developer`ToPackedArray@
+   Table[x + I y, {y, -l, l, 2 l/n}, {x, -l, l, 2 l/n}];
+v = a = aold = 0 z;
+Do[z += v dt + (4 a - aold) dt^2/6;
+  vpredict = v + (3 a - aold) dt/2;
+  anew = (z1 - z)/(h^2 + Abs[z1 - z]^2)^1.5 + (z2 - 
+       z)/(h^2 + Abs[z2 - z]^2)^1.5 + (z3 - 
+       z)/(h^2 + Abs[z3 - z]^2)^1.5 - c z - k vpredict;
+  v += (5 anew + 8 a - aold) dt/12;
+  aold = a; a = anew, {t, 0, tmax, dt}];
+res = Abs[{z - z1, z - z2, z - z3}];
+img = Image[0.2/res, Interleaving -> False];
+
+Export["magnet.png", ImageResolution->300];
+
+
+scale = 1;
+Xmag1 = {scale Cos[2 \[Pi]/3], scale Sin[2 \[Pi]/3], -.2};
+Xmag2 = {scale Cos[4 \[Pi]/3], scale Sin[4 \[Pi]/3], -.2};
+Xmag3 = {scale Cos[2 \[Pi]], scale Sin[2 \[Pi]], -.2};
+Xmags = {Xmag1, Xmag2, Xmag3};
+
+R[t_, \[Theta]_, \[CurlyPhi]_] := {l*Sin[\[Theta][t]]*
+    Cos[\[CurlyPhi][t]], l*Sin[\[Theta][t]]*Sin[\[CurlyPhi][t]], 
+   l - l*Cos[\[Pi]  - \[Theta][t]]};
+   
+   
+Clear[mag];
+
+mag[tf_, m1_: Xmag1[[;; 2]], m2_: Xmag2[[;; 2]], m3_: Xmag3[[;; 2]]] :=
+
+  Module[{h = 0.25, pos, X = {m1[[1]], m2[[1]], m3[[1]]}, r, 
+   Y = {m1[[2]], m2[[2]], m3[[2]]}, eqns, k = .1, x, y , z, theta, 
+   phi},
+  
+  r[\[Tau]_] := {l*Sin[\[Theta][\[Tau]]]*Cos[\[CurlyPhi][\[Tau]]], 
+    l*Sin[\[Theta][\[Tau]]]*Sin[\[CurlyPhi][\[Tau]]], 
+    l - l*Cos[\[Pi]  - \[Theta][\[Tau]]]};
+  
+  
+  x[\[Tau]_] := r[\[Tau]][[1]];
+  y[\[Tau]_] := r[\[Tau]][[2]];
+  z[\[Tau]_] := r[\[Tau]][[3]];
+  
+  eqns = (
+    {(1 x''[t] + .09 x'[t] + k*x[t] + 
+        Sum[(r[t] - 
+             Xmags[[i]] )/(h^2  + (r[t] - Xmags[[i]]).(r[t] - 
+                 Xmags[[i]]) )^(3/2), {i, 1, 3}].{1, 0, 0} == 0),
+     
+     (1 y''[t] + .09 y'[t]  + k*y[t] + 
+        Sum[(r[t] - 
+             Xmags[[i]] )/(h^2  + (r[t] - Xmags[[i]]).(r[t] - 
+                 Xmags[[i]]))^(3/2), {i, 1, 3}].{0, 1, 0}   == 0),
+     
+      \[Theta][0] == \[Pi] - .2, \[Theta]'[0] == 
+      0.0,  \[CurlyPhi][0] == \[Pi]/5, \[CurlyPhi]'[0] == 0});
+  
+  
+  {theta, phi} = 
+   Flatten[NDSolve[eqns, {\[Theta], \[CurlyPhi]}, {t, 0, tf}, 
+      StartingStepSize -> 1/10000, MaxStepFraction -> Infinity, 
+      Method -> {"FixedStep", Method -> "ExplicitRungeKutta"}, 
+      AccuracyGoal -> 26, PrecisionGoal -> 12]][[All, 2]]
+  
+  
+  ]
+  
+  
+Clear[\[CapitalTheta], \[CapitalPhi]]
+
+{\[CapitalTheta], \[CapitalPhi]} = mag[100];
+
+Clear[pos]
+pos[t_] := {l*Sin[\[CapitalTheta][t]]*Cos[\[CapitalPhi][t]], 
+   l*Sin[\[CapitalTheta][t]]*Sin[\[CapitalPhi][t]], 
+   l + l*Cos[ \[CapitalTheta][t]]};
+   
+   
+   
+(* Define images for magnets and pend*)
+
+Clear[mags, tube, cap];
+
+mags = Graphics3D[{Black, Specularity[.5], EdgeForm@None, Opacity[1], 
+      Cylinder[{#, # + {0, 0, .05}}, .2]} & /@ Xmags];
+
+tube[tf_] := Module[{x, y, z},
+  x[t_] := pos[t][[1]];
+  y[t_] := pos[t][[2]];
+  z[t_] := pos[t][[3]];
+  
+  {Black, Specularity[.5], EdgeForm@None, Opacity[1], 
+   Cylinder[ { {x[tf], y[tf], z[tf]},   {0, 0, 20} }, .04]}
+  
+  ]
+
+cap[tf_] := Module[{x, y, z, norm, r0, V},
+  x[t_] := pos[t][[1]];
+  y[t_] := pos[t][[2]];
+  z[t_] := pos[t][[3]];
+  
+  r0 = pos[tf];
+  V = (r0 - {0, 0, 20})/Norm[r0 - {0, 0, 20}];
+  
+  
+  
+  
+  {Black, Specularity[.5], Opacity[1], EdgeForm@None, 
+   Cylinder[ { pos[tf],   pos[tf] + .05*V}, .2]}
+  
+  ]
+
+(* map image to plane *)
+
+img = Image[Import["magnet.png"]];
+
+Clear[plane, scale]
+scale[f_] := 
+  f*{  {1, 1, -.2/f}, {-1, 1, -.2/f}, {-1, -1, -.2/f}, {1, -1, -.2/f}};
+p = scale[20];
+verts =  {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
+plane[p_] := 
+  Graphics3D[{Texture[img], 
+    Polygon[p, VertexTextureCoordinates -> verts]}];
+pn = (plane /@ Permutations[p])[[8]];
+
+
+(* Final function that plots everything together*)
+
+all[tf_] := 
+  Show[pn, mags, Graphics3D[tube[tf]], Graphics3D[cap[tf]] , 
+   PlotRange -> 20, Background -> Black, 
+   Lighting -> {{"Directional", White, {1, 1, 3}}}, 
+   BoundaryStyle -> None, ViewPoint -> {.15, .2, .06}, 
+   ViewAngle -> Pi/7, Boxed -> False];
+   
+   
+(* To export a sequence of pngs to be turned into an animation run the following after creating a directory ./magnet_gif *)
+
+
+rng = Range[0, 68, .01];
+
+ints = IntegerString[#, 10, 6] & /@ Range[Length[rng]];
+
+count = 1;
+For[ i = 0, i <= 68, i += .01,
+  Export["./magnet_gif/" <> ToString[ints[[count]]] <> ".png",  
+   all[i], ImageResolution -> 300];
+  count += 1;
+  ];
+  
+(* decrase step size for less smooth animation*)
