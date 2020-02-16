@@ -1,0 +1,43 @@
+(* Just Liénard\[Dash]Wiechert potentials *)
+
+eField[x_, y_, t_, z_: 0] := 
+ Module[{r, rs, n, \[Beta], \[Gamma], \[Beta]dot, TR},
+  r = {x, y, z}; 
+  rs[\[Tau]_] := {0, Sin[.8 \[Tau]], 0};
+  n = (r - rs[t])/Norm[r - rs[t]];
+  \[Beta] = D[rs[\[Tau]], \[Tau]] /. \[Tau] -> t;
+  \[Beta]dot =  D[rs[\[Tau]], {\[Tau], 2}] /. \[Tau] -> t;
+  \[Gamma] = 1/Sqrt[1 - \[Beta].\[Beta]];
+  (*TR =Flatten[ NSolve[ (r-rs[tr]).(r-rs[tr])  \[Equal](t-tr)^2, tr, 
+  Reals  ]][[1,2]];*)
+  
+  (* Near field approximation tr ~ t *)
+  
+  ((n - \[Beta])/(\[Gamma]^2 (1 - n.\[Beta])^3*Norm[r - rs[t]]^2) + 
+    Cross[n, Cross[n - \[Beta], \[Beta]dot]]/((1 - n.\[Beta])^3*
+     Norm[r - rs[t]]))(*/.{t\[Rule] TR}*)
+  
+  
+  
+  ]
+
+Clear[pts]
+pts[t_ ] := 
+  Table[{0, 
+     Sin[.8 t]} + .1 {Cos[\[Theta]], Sin[\[Theta]]}, {\[Theta], 0, 
+    2 \[Pi], (2 \[Pi])/20}];
+
+
+Clear[stream]
+stream[t_] := 
+  StreamPlot[eField[x, y, t][[;; 2]], {x, -1.3, 1.3}, {y, -1.4, 1.4}, 
+   StreamPoints -> {pts[t], Automatic, Scaled[2]}, 
+   StreamStyle -> {None, Lighter[Blue]}, StreamMarkers -> None] ;
+
+all[t_] := 
+ Show[stream[t], Graphics[{White, Disk[{0, Sin[.8 t]}, .1]}], 
+  Background -> Black, Frame -> False
+  ]
+
+Export["efield.gif", all /@ Range[0, 2 \[Pi]/.8, 2 \[Pi]/(.8*200)], 
+ ImageResolution -> 300]
