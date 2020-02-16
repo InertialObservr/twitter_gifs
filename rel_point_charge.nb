@@ -1,9 +1,11 @@
 (* Just Liénard\[Dash]Wiechert potentials *)
 
+\[Omega] = .8;
+
 eField[x_, y_, t_, z_: 0] := 
  Module[{r, rs, n, \[Beta], \[Gamma], \[Beta]dot, TR},
   r = {x, y, z}; 
-  rs[\[Tau]_] := {0, Sin[.8 \[Tau]], 0};
+  rs[\[Tau]_] := {0, Sin[\[Omega] \[Tau]], 0};
   n = (r - rs[t])/Norm[r - rs[t]];
   \[Beta] = D[rs[\[Tau]], \[Tau]] /. \[Tau] -> t;
   \[Beta]dot =  D[rs[\[Tau]], {\[Tau], 2}] /. \[Tau] -> t;
@@ -11,7 +13,7 @@ eField[x_, y_, t_, z_: 0] :=
   (*TR =Flatten[ NSolve[ (r-rs[tr]).(r-rs[tr])  \[Equal](t-tr)^2, tr, 
   Reals  ]][[1,2]];*)
   
-  (* Near field approximation tr ~ t *)
+  (* near field approximation tr~t*)
   
   ((n - \[Beta])/(\[Gamma]^2 (1 - n.\[Beta])^3*Norm[r - rs[t]]^2) + 
     Cross[n, Cross[n - \[Beta], \[Beta]dot]]/((1 - n.\[Beta])^3*
@@ -24,8 +26,8 @@ eField[x_, y_, t_, z_: 0] :=
 Clear[pts]
 pts[t_ ] := 
   Table[{0, 
-     Sin[.8 t]} + .1 {Cos[\[Theta]], Sin[\[Theta]]}, {\[Theta], 0, 
-    2 \[Pi], (2 \[Pi])/20}];
+     Sin[\[Omega] t]} + .1 {Cos[\[Theta]], Sin[\[Theta]]}, {\[Theta], 
+    0, 2 \[Pi], (2 \[Pi])/20}];
 
 
 Clear[stream]
@@ -35,7 +37,7 @@ stream[t_] :=
    StreamStyle -> {None, Lighter[Blue]}, StreamMarkers -> None] ;
 
 all[t_] := 
- Show[stream[t], Graphics[{White, Disk[{0, Sin[.8 t]}, .1]}], 
+ Show[stream[t], Graphics[{White, Disk[{0, Sin[\[Omega] t]}, .1]}], 
   Background -> Black, Frame -> False
   ]
 
