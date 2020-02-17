@@ -43,7 +43,7 @@ gif = Join[tab1, tab2];
 
 gif // Length
 
-306
+
 Join[init, oth]
 
 Join[init, oth] // Length
