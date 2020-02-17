@@ -1,0 +1,52 @@
+(*adapted from https://demonstrations.wolfram.com/PythagorasTree/ *)
+
+PythagorasTree[p1_, bend_: 4] := 
+ Module[{p = 2^p1, xx = 0, yy = 0, scale = -1, f = N[\[Pi]/bend], c, 
+   cc, ss, sxy, eps = .005, a1, a2, b1, b2, c1, c2, d1, d2, x1 = 0, 
+   y1 = 0, u1 = 1, v1 = 0, q = 0, j = 1, k, m, xa, xb, ya, yb, 
+   done = False, tree = {}}, cc = Cos[f]; ss = Sin[f]; a1 = -cc ss; 
+  a2 = cc^2; b1 = a1 + a2; b2 = -a1 + a2; c1 = b2; c2 = 1 - b1; 
+  d1 = 1 - a1; d2 = 1 - a2; s[0] = 1; 
+  tree = {{{xx, yy}, {xx + scale, yy}, {xx + scale, yy + scale}, {xx, 
+      yy + scale}, {xx, yy}}}; 
+  While[! done, m = q + j; x = u1 - x1; y = v1 - y1; 
+   xa = x1 + a1 x - a2 y; ya = y1 + a2 x + a1 y; 
+   xb = x1 + b1 x - b2 y; yb = y1 + b2 x + b1 y; 
+   x2[m] = x1 + c1 x - c2 y; y2[m] = y1 + c2 x + c1 y; 
+   u2[m] = x1 + d1 x - d2 y; v2[m] = y1 + d2 x + d1 y; 
+   sxy = x x + y y; s[m] = 1; 
+   tree = Append[
+     tree, {{xx + scale x1, yy - scale y1}, {xx + scale xa, 
+       yy - scale ya}, {xx + scale xb, yy - scale yb}, {xx + scale u1,
+        yy - scale v1}, {xx + scale u2[m], 
+       yy - scale v2[m]}, {xx + scale x2[m], 
+       yy - scale y2[m]}, {xx + scale x1, yy - scale y1}}]; x1 = xa; 
+   y1 = ya; u1 = xb; v1 = yb; 
+   If[m == p || sxy < eps, k = 1; While[s[m - k] == 0, k++]; 
+    If[m == k, done = True, q = m - k; x1 = x2[q]; y1 = y2[q]; 
+     u1 = u2[q]; v1 = v2[q]; s[q]--; j = 0;];]; j++;]; Polygon /@ tree]
+
+tree[m_, n_] := 
+ Graphics[{With[{pt = PythagorasTree[m, n]}, 
+    MapIndexed[{EdgeForm[{Thickness[.005], 
+         ColorData["Rainbow"][1 - First@#2/Length[pt]]}], Opacity[.7],
+        ColorData["Rainbow"][First@#2/Length[pt]], #} &, pt]]}, 
+  ImageSize -> {400, 400}, Background -> Black]
+
+init = 1.5 & /@ Range[Length[tab1]];
+oth = .01 & /@ Range[Length[tab2]];
+
+tab1 = Table[tree[i, 4], {i, 0, 4}];
+tab2 = Table[tree[4, j], {j, 4, 1, -.01}];
+
+gif = Join[tab1, tab2];
+
+gif // Length
+
+306
+Join[init, oth]
+
+Join[init, oth] // Length
+
+Export["tree.gif", Join[gif], "DisplayDurations" -> Join[init, oth], 
+ ImageResolution -> 200]
