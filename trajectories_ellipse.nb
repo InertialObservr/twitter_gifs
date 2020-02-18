@@ -1,0 +1,114 @@
+Clear[traj, resist];
+
+traj[tf_, \[Theta]_, V_, \[CurlyPhi]_, op_: 1] := 
+ ParametricPlot3D[{V Cos[\[Theta]] Cos[\[CurlyPhi]] t, 
+   V Cos[\[Theta]]*Sin[\[CurlyPhi]] t, 
+   V Sin[\[Theta]] t - 9.8 t^2/2}, {t, 0, tf}, 
+  PlotStyle -> {Thick, Opacity[op, Lighter[Blue, .5]]} ]
+
+resist[tf_, \[Theta]_, V_, vt_, op_: 1] := 
+ ParametricPlot[{V vt Cos[\[Theta]]/9.8 (1 - Exp[-9.8 t/vt]), 
+   vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t}, {t, 0,
+    tf}, PlotStyle -> {Thick, Opacity[op, Red]}]
+
+Flatten[Solve[ 
+   D[vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t, t] ==
+     0, t]][[1, 2]]
+
+Flatten[Solve[D[V Sin[\[Theta]] t - 9.8 t^2/2, t] == 0, t]][[1, 2]]
+
+Clear[tmax, respt, pointmax, max, ptmax, ptmax2]
+tmax[V_, vt_, \[Theta]_] := 
+  0.102041 vt Log[( vt + V Sin[\[Theta]])/vt];
+
+max[V_, \[Theta]_] := 0.102041 V Sin[\[Theta]];
+
+pointmax[tf_, \[Theta]_, V_, vt_] := 
+ Graphics[{Green, PointSize[.015], 
+   Opacity[HeavisideTheta[tf - tmax[V, vt, \[Theta]]]], 
+   Point[respt[tmax[V, vt, \[Theta]], V, vt, \[Theta]] ]}]
+
+ptmax[tf_, V_, \[Theta]_, \[CurlyPhi]_] := 
+ Graphics3D[{Orange,(*PointSize[.015],*)
+   Opacity[HeavisideTheta[tf - max[V, \[Theta]]]], 
+   Sphere[tr[max[V, \[Theta]], V, \[Theta], \[CurlyPhi]] , 3]}]
+
+ptmax2[tf_, V_, \[Theta]_, \[CurlyPhi]_, op_] := 
+  Graphics3D[{Orange,(*PointSize[.015],*)Opacity[op], 
+    Sphere[tr[max[V, \[Theta]], V, \[Theta], \[CurlyPhi]] , 3]}];
+
+pointend[tf_, \[Theta]_, V_, \[CurlyPhi]_] := 
+ Graphics3D[{White, PointSize[.006], 
+   Point[{V Cos[\[Theta]] Cos[\[CurlyPhi]] tf, 
+     V Cos[\[Theta]]*Sin[\[CurlyPhi]] tf, 
+     V Sin[\[Theta]] tf - 9.8 tf^2/2}]}]
+
+respt[t_, V_, 
+   vt_, \[Theta]_] := {V vt Cos[\[Theta]]/9.8 (1 - Exp[-9.8 t/vt]), 
+   vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t};
+
+tr[t_, V_, \[Theta]_, \[CurlyPhi]_] := {V Cos[\[Theta]] Cos[\
+\[CurlyPhi]] t, V Cos[\[Theta]]*Sin[\[CurlyPhi]] t, 
+  V Sin[\[Theta]] t - 9.8 t^2/2}
+
+
+Clear[r3D]
+r3D[tf_, \[CurlyPhi]_: 0,  op_: 1] := 
+ Table[Show[traj[tf, \[Theta], 50, \[CurlyPhi], op], 
+   pointend[tf, \[Theta], 50, \[CurlyPhi]], 
+   ptmax[tf,  50, \[Theta], \[CurlyPhi]], Axes -> None, 
+   PlotRange -> {{-400, 400}, {-400, 400}, {0, 150}}, 
+   Background -> Black], {\[Theta], 0 , \[Pi], \[Pi]/20}]
+
+tops = Table[
+   tr[max[50, \[Theta]], 50, \[Theta], \[CurlyPhi]] , {\[Theta], 
+    0, \[Pi], \[Pi]/20}, {\[CurlyPhi], 0, 2 \[Pi], \[Pi]/20}];
+center = tr[max[50, \[Pi]/2], 50, \[Pi]/2, 0]/2;
+major = 50 Cos[\[Pi]/4] Cos[0] max[50, \[Pi]/4];
+
+
+Clear[soid]
+soid[t_, op_: 1, ang_: \[Pi]/10, op2_: 1] := 
+ Show[Table[
+   r3D[t, \[CurlyPhi], op] , {\[CurlyPhi], 0, 2 \[Pi], 2 \[Pi]/10} ], 
+  PlotStyle -> Opacity[op2], Boxed -> False, 
+  PlotRange -> {{-600, 600}, {-600, 600}, {0, 150}}, 
+  ViewPoint -> {Cos[ang], Sin[ang], .2}, ViewAngle -> Pi/10]
+
+
+R[\[Theta]_] := {{Cos[\[Theta]], Sin[\[Theta]], 0}, {-Sin[\[Theta]], 
+    Cos[\[Theta]], 0}, {0, 0, 1}};
+
+
+Clear[ellip]
+ellip[op_: 1] := 
+  Graphics3D[{Opacity[op], 
+    Ellipsoid[center, {major, major, center[[3]]}]}];
+
+
+Clear[maxpts]
+maxpts[op_: 1] := 
+  Show[Flatten[
+    Table[ ptmax2[12,  50, \[Theta], \[CurlyPhi], op], {\[Theta], 
+      0 , \[Pi], \[Pi]/20}, {\[CurlyPhi], 0, 2 \[Pi], 2 \[Pi]/10}], 
+    1], Boxed -> False, Axes -> None, 
+   PlotRange -> {{-250, 250}, {-150, 250}, {0, 200}}, 
+   Background -> Black, ViewPoint -> {0, 2*1.8, 2*1.5}];
+
+
+tab = Table[Show[soid[tf, .5]], {tf, 0, 12, .1}][[2 ;;]];
+
+pause = Table[tab[[-1]], {x, 0, 1, .1}];
+
+
+fout =  Table[Show[soid[12, op]], {op, .5, 0, -.01}];
+
+
+fin = Table[Show[ {fout[[-1]], ellip[op]}], {op, 0, 1, .05}];
+finPause = Table[fin[[-1]], {x, 0, 1, .05}];
+
+anim = Join[tab, pause, fout, fin, finPause];
+
+
+Export["soid.gif", anim, "AnimationRepetitions" -> Infinity, 
+ ImageResolution -> 300]
