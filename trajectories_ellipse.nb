@@ -1,4 +1,4 @@
-Clear[traj, resist];
+Clear[traj];
 
 traj[tf_, \[Theta]_, V_, \[CurlyPhi]_, op_: 1] := 
  ParametricPlot3D[{V Cos[\[Theta]] Cos[\[CurlyPhi]] t, 
@@ -6,27 +6,13 @@ traj[tf_, \[Theta]_, V_, \[CurlyPhi]_, op_: 1] :=
    V Sin[\[Theta]] t - 9.8 t^2/2}, {t, 0, tf}, 
   PlotStyle -> {Thick, Opacity[op, Lighter[Blue, .5]]} ]
 
-resist[tf_, \[Theta]_, V_, vt_, op_: 1] := 
- ParametricPlot[{V vt Cos[\[Theta]]/9.8 (1 - Exp[-9.8 t/vt]), 
-   vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t}, {t, 0,
-    tf}, PlotStyle -> {Thick, Opacity[op, Red]}]
 
-Flatten[Solve[ 
-   D[vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t, t] ==
-     0, t]][[1, 2]]
-
-Flatten[Solve[D[V Sin[\[Theta]] t - 9.8 t^2/2, t] == 0, t]][[1, 2]]
-
-Clear[tmax, respt, pointmax, max, ptmax, ptmax2]
+Clear[tmax, max, ptmax, ptmax2]
 tmax[V_, vt_, \[Theta]_] := 
   0.102041 vt Log[( vt + V Sin[\[Theta]])/vt];
 
 max[V_, \[Theta]_] := 0.102041 V Sin[\[Theta]];
 
-pointmax[tf_, \[Theta]_, V_, vt_] := 
- Graphics[{Green, PointSize[.015], 
-   Opacity[HeavisideTheta[tf - tmax[V, vt, \[Theta]]]], 
-   Point[respt[tmax[V, vt, \[Theta]], V, vt, \[Theta]] ]}]
 
 ptmax[tf_, V_, \[Theta]_, \[CurlyPhi]_] := 
  Graphics3D[{Orange,(*PointSize[.015],*)
@@ -43,9 +29,7 @@ pointend[tf_, \[Theta]_, V_, \[CurlyPhi]_] :=
      V Cos[\[Theta]]*Sin[\[CurlyPhi]] tf, 
      V Sin[\[Theta]] tf - 9.8 tf^2/2}]}]
 
-respt[t_, V_, 
-   vt_, \[Theta]_] := {V vt Cos[\[Theta]]/9.8 (1 - Exp[-9.8 t/vt]), 
-   vt/9.8  (V Sin[\[Theta]] + vt) (1 - Exp[-9.8 t/vt]) - vt t};
+
 
 tr[t_, V_, \[Theta]_, \[CurlyPhi]_] := {V Cos[\[Theta]] Cos[\
 \[CurlyPhi]] t, V Cos[\[Theta]]*Sin[\[CurlyPhi]] t, 
