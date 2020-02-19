@@ -1,0 +1,111 @@
+Clear[solve2]
+
+solve2[r0_: .2, \[CurlyPhi]0_: \[Pi]/4] := 
+ Module[{x, y, sols, G, x2, y2, R, R2, galPos, x0, y0},
+  
+  G = 6.6*10^(-10);
+  
+  x[t_] := r[t]*Cos[\[CurlyPhi][t]];
+  y[t_] := r[t]*Sin[\[CurlyPhi][t]];
+  R[t_] := {x[t], y[t]};
+  x0 = r0*Cos[\[CurlyPhi]0];
+  y0 = r0*Sin[\[CurlyPhi]0];
+  
+  x2[t_] := r2[t]*Cos[\[CurlyPhi]2[t]];
+  y2[t_] := r2[t]*Sin[\[CurlyPhi]2[t]];
+  galPos[t_] := {X[t], Y[t]};
+  
+  
+  R2[t_] := galPos[t] + {x2[t], y2[t]};
+  
+  
+  
+  sols = Flatten[NDSolve[{
+       X''[t] == ( -G 10^(10)/(Norm[galPos[t]]^3 + .1)*galPos[t]).{1, 
+          0},
+       Y''[t] == ( -G 10^(10)/(Norm[galPos[t]]^3 + .1)*galPos[t]).{0, 
+          1},
+       
+       x''[t] == -G 10^(10)/(r[t]^2 + .1)*
+          Cos[\[CurlyPhi][t]] - (G 10^(10)/(
+            Norm[R[t] - galPos[t]]^3 + .1)*(R[t] - galPos[t])).{1, 
+           0}, y''[t] ==  -G 10^(10)/(r[t]^2 + .1)*
+          Sin[\[CurlyPhi][t]] - (G 10^(10)/(
+            Norm[R[t] - galPos[t]]^3 + .1)*(R[t] - galPos[t])).{0, 1}, 
+       
+       x2''[
+         t] == -G 10^(10)/(
+          Norm[R2[t] - galPos[t]]^3 + .1)*(R2[t] - galPos[t]).{1, 
+            0} - (G 10^(10)/(Norm[R2[t]]^3 + .1)*R2[t]).{1, 0}, 
+       y2''[t] ==   -G 10^(10)/(
+          Norm[R2[t] - galPos[t]]^3 + .1)*(R2[t] - galPos[t]).{0, 
+            1} - (G 10^(10)/(Norm[R2[t]]^3 + .1)*R2[t]).{0, 1},
+       
+       r[0] == r0, 
+       r'[0] == 0, \[CurlyPhi][0] == \[CurlyPhi]0, \[CurlyPhi]'[0] == 
+        20, r2[0] == r0, \[CurlyPhi]2[0] == \[CurlyPhi]0, 
+       r2'[0] == 0, \[CurlyPhi]2'[0] == 20, X[0] == 2, X'[0] == -.1, 
+       Y[0] == 0, Y'[0] == 0 }, {r, \[CurlyPhi], r2, \[CurlyPhi]2, X, 
+       Y}, {t, 0, 6}]  ][[All, 2]];
+  
+  Return[sols]
+  
+  ]
+  
+
+
+(* Decrease radStep and angStep for more particles*)
+
+radStep=.01;
+angStep = 2 \[Pi]/20;
+
+sols2 = Table[
+   solve2[r0, \[CurlyPhi]0], {\[CurlyPhi]0, angStep , 2 \[Pi], 
+    angStep}, {r0, .1, .2, radStep}];
+sols2 = Flatten[sols2, 1];
+
+
+
+getSols2[t_, sols_] := 
+ Module[{r, \[CurlyPhi], r2, \[CurlyPhi]2, galPos, p, p2, X, Y},
+  
+  (*galPos={4 - .4t,.2};*)
+  
+  Table[
+   r = sols[[i]][[1]][t];
+   \[CurlyPhi] = sols[[i]][[2]][t];
+   r2 = sols[[i]][[3]][t];
+   \[CurlyPhi]2 = sols[[i]][[4]][t];
+   X = sols[[i]][[5]][t];
+   Y = sols[[i]][[6]][t];
+   galPos = {X, Y};
+   
+   p = {r*Cos[\[CurlyPhi]], r*Sin[\[CurlyPhi]]};
+   p2 = galPos + {r2*Cos[\[CurlyPhi]2], r2*Sin[\[CurlyPhi]2]};
+   
+   {Point[p], Point[p2], Point[galPos]}, {i, 1, Length[sols]}]
+  
+  ]
+  
+  
+  
+Clear[toPlot2];
+
+toPlot2[t_] := getSols2[t, sols2];
+
+
+Clear[p, p2];
+
+p[t_] := toPlot2[t][[All, 1]];
+p2[t_] := toPlot2[t][[All, 2]];
+
+
+
+all[t_] := Show[Graphics[{White, PointSize[.001], p[t]}], 
+  Graphics[{Lighter[Blue, .4], PointSize[.001], p2[t]}], 
+  PlotRange -> {{-1, 3}, {-1, 1}}, Background -> Black]
+  
+(* Mathematica will crash if you run this with too fine radStep or angStep*)
+
+Manipulate[all[t], {t, .001, 6}]
+
