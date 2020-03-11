@@ -1,0 +1,41 @@
+Clear[f, A, a];
+
+A[x_, t_: 1, N_: 15, f_: 0.25] := 
+ 2/\[Pi] Sum[Sin[2 \[Pi] (f*n*x - t)]/n, {n, 1, N}]
+
+a[x_, k_, t_: 1, f_: 0.25] := 
+ 2/\[Pi] (Sin[2 \[Pi] (f*k*x - t)]/k  + 2 + 3.4*Log[k] )
+
+
+Manipulate[ 
+ Show[Plot[A[x, t], {x, -15, 15}, PlotStyle -> White, 
+   Method -> {"TransparentPolygonMesh" -> True}, 
+   PerformanceGoal -> "Quality", PlotPoints -> 100], 
+  Plot[a[x, #, t], {x, -15, 15}, PerformanceGoal -> "Quality", 
+     PlotStyle -> { Hue[1 - #/15], Opacity[1 - #/20]}, 
+     PlotPoints -> 500] & /@ Range[15], 
+  PlotRange -> {{-15, 15}, {-4, 12}} , ImageSize -> {600, 400}, 
+  Axes -> {False, False}, Background -> Black]   , {t, 1, 0}]
+
+
+Clear[all];
+
+all[t_] := 
+ Show[Plot[A[x, t], {x, -15, 15}, PlotStyle -> White, 
+   Method -> {"TransparentPolygonMesh" -> True}, PlotPoints -> 100], 
+  Plot[a[x, #, t], {x, -15, 15}, PerformanceGoal -> "Quality", 
+     PlotStyle -> { Hue[1 - #/15], Opacity[1 - #/20]}, 
+     PlotPoints -> 500] & /@ Range[15], 
+  PlotRange -> {{-15, 15}, {-4, 12}} , ImageSize -> {600, 400}, 
+  Axes -> {False, False}, Background -> Black]
+
+ts = Range[1, 0, -1/300];
+
+ints = IntegerString[#, 10, 6] & /@ Range[50*Length[ts]];
+
+For[ix = 1, ix <= Length[ts], ix++, 
+ 
+ Export["./fourr/" <> ToString[ints[[ix]]] <> ".png", all[ts[[ix]]], 
+  ImageResolution -> 300   ]
+ 
+ ]
