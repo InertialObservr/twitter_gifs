@@ -1,0 +1,43 @@
+Clear[r, c, func, s, sq, circ]
+
+r[t_] := {Cos[t], Sin[t]};
+c[t_, op_: 1] := 
+  Graphics[{PointSize[.025], Lighter[Blue, .5], Point[r[t]]}];
+
+func[t_] := Module[{res},
+   If[0 <= t <=  \[Pi]/4, 
+    res = {Cos[\[Pi]/4], Sin[\[Pi]/4]/(\[Pi]/4) t}];
+   If[\[Pi]/4 < t <= 3 \[Pi]/4 , 
+    res = p1 + (t - \[Pi]/4)/(3 \[Pi]/4 - \[Pi]/4) *(p2 - p1)];
+   If[3 \[Pi]/4 < t <= 5 \[Pi]/4 , 
+    res = p2 + (t - 3 \[Pi]/4)/(5 \[Pi]/4 - 3 \[Pi]/4 ) *(p3 - p2)];
+   If[5 \[Pi]/4 < t <= 7 \[Pi]/4 , 
+    res = p3 + (t - 5 \[Pi]/4)/(7 \[Pi]/4 - 5 \[Pi]/4 ) *(p4 - p3)];
+   If[7 \[Pi]/4 < t <= 9 \[Pi]/4 , 
+    res = p4 + (t - 7 \[Pi]/4)/(9 \[Pi]/4 - 7 \[Pi]/4 ) *(p1 - p4)];
+   
+   Return[res]
+   
+   ];
+
+s[t_] := Graphics[{PointSize[.025], Lighter[Green, .5], 
+   Point[func[t]]}]
+p1 = r[\[Pi]/4];
+p2 = r[\[Pi]/4 + \[Pi]/2];
+p3 = r[\[Pi]/4 + \[Pi]];
+p4 =  r[7 \[Pi]/4];
+
+sq[op_: 1] := 
+  Graphics[{ Opacity[op], Lighter[Green, .5], 
+    Line[{ p1, p2, p3, p4, p1} ]  }];
+circ[op_: 1] := 
+  Graphics[{Opacity[op], Lighter[Blue, .5], Circle[{0, 0}]}]; 
+  
+pts[t_, op_] := 
+ Show[sq[op], circ[op], c[t], s[t], 
+  PlotRange -> {{-1.5, 1.5}, {-1.5, 1.5}}, Background -> Black, 
+  Epilog -> 
+   Style[Text["@InertialObservr", {1.05, 1.35}], 12, White, 
+    FontFamily -> "Georgia"] ]
+
+Manipulate[pts[t, 1], {t, 0, 2 \[Pi]}]
