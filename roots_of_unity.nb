@@ -1,11 +1,11 @@
-In[2966]:= pt[t_] := Point[{Cos[t], Sin[t] }];
+pt[t_] := Point[{Cos[t], Sin[t] }];
 line[t_] := Line[ {{0, 0}, {Cos[t], Sin[t] }}]
 
-In[2968]:= roots = {0 , 2 \[Pi]/3, 4 \[Pi]/3};
+roots = {0 , 2 \[Pi]/3, 4 \[Pi]/3};
 
-In[2969]:= dots = {pt[0], pt[2 \[Pi]/3], pt[4 \[Pi]/3]};
+dots = {pt[0], pt[2 \[Pi]/3], pt[4 \[Pi]/3]};
 
-In[2970]:= 
+
 redDot = Graphics[{Red, PointSize[Large], dots[[1]]}, Axes -> True, 
    PlotRange -> {{-1, 1}, {-1, 1}}] ;
 greenDot = 
@@ -16,14 +16,14 @@ blueDot =
    PlotRange -> {{-1, 1}, {-1, 1}}] ;
 redDots = {redDot, greenDot, blueDot};
 
-In[2974]:= 
+
 p1 = Graphics[{Blue, PointSize[Large], pt[\[Pi]/3]}, Axes -> True, 
    PlotRange -> {{-1, 1}, {-1, 1}}];
 l1 =  Graphics[{line[\[Pi]/3]}, Axes -> True, 
    PlotRange -> {{-1, 1}, {-1, 1}}];
 Show[l1, Graphics[Circle[{0, 0}]], redDots, p1]
 
-Out[2976]= \!\(\*
+ \!\(\*
 GraphicsBox[{
     LineBox[NCache[{{0, 0}, {
        Rational[1, 2], Rational[1, 2] 3^Rational[1, 2]}}, {{0, 0}, {
@@ -48,7 +48,7 @@ Rational[2, 3], 0.6666666666666666], 0], PointSize[Large],
 Axes->True,
 PlotRange->{{-1, 1}, {-1, 1}}]\)
 
-In[3042]:= plotAll[t_, color_] := Module[{p1, l1},
+plotAll[t_, color_] := Module[{p1, l1},
    p1 = Graphics[{color, PointSize[Large], pt[t]}, Axes -> True, 
      PlotRange -> {{-1, 1}, {-1, 1}}];
    l1 =  Graphics[line[t], Axes -> True, 
@@ -57,7 +57,7 @@ In[3042]:= plotAll[t_, color_] := Module[{p1, l1},
    Show[l1, Graphics[Circle[{0, 0}]], redDots, p1] 
    ];
 
-In[3083]:= 
+
 r1 = Table[
    plotAll[t, Darker[Green]], {t, 0, roots[[2]], .1*roots[[2]] } ];
 pauser1 = 
