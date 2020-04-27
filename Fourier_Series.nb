@@ -1,8 +1,3 @@
-Clear[f, tup, vec];
-f[x_, n_] := {x, 
-  Sum[FourierCosCoefficient[x^2, x, k]*Cos[k*\[Pi]*x], {k, 1, n}]}
-
-
 Clear[fo, f];
 
 (*Insert your favorite fourier series*)
