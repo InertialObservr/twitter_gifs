@@ -1,0 +1,48 @@
+Clear[f, tup, vec];
+f[x_, n_] := {x, 
+  Sum[FourierCosCoefficient[x^2, x, k]*Cos[k*\[Pi]*x], {k, 1, n}]}
+
+
+Clear[fo, f];
+
+(*Insert your favorite fourier series*)
+
+f[x_, n_] := 
+  1/4 \[Pi] + 
+   Sum[ (-1)^k/k*BesselJ[1, k*\[Pi]]*Cos[k*\[Pi] (x)], {k, 1, n}];
+
+fo[n_] := 
+ Plot[ f[x, n], {x, 0, 2}, Frame -> True, Axes -> False, 
+  Frame -> True, Axes -> False, Background -> Black, 
+  PlotStyle -> Hue[(n)/230], FrameTicksStyle -> White, 
+  PlotRange -> {{-1.05 + 1, 1.05 + 1}, {0, 1.1}}]
+
+Clear[show];
+
+show[ n_] := 
+ Show[fo[n] , 
+  Epilog -> {Style[
+     Text["\!\(\*FractionBox[\(\[Pi]\), \(4\)]\) + \
+\!\(\*UnderoverscriptBox[\(\[Sum]\), \(k = 1\), \(\(\\\ \)\(N\)\)]\) \
+(-1\!\(\*SuperscriptBox[\()\), \(k\)]\) \
+\!\(\*FractionBox[\(\*SubscriptBox[\(J\), \(1\)] \((k\[Pi])\)\), \
+\(k\)]\) cos(k\[Pi]x)" <> "       (N=" <> ToString[n] <> 
+       ")", {1, .35} ], White, 12, FontFamily -> "Times"], 
+    Style[Text["@InertialObservr", {1, .07}], 9, Lighter[Green, .7], 
+     FontFamily -> "Georgia"]} , BoxRatios -> 1] 
+
+
+
+Animate[show[n], {n, 1, 50, 1}, AnimationDirection -> ForwardBackward]
+
+
+(*Export Animation*)
+
+nTerms = 200;
+finit = Table[show[final], {final, 1, nTerms}];
+fors = Join[ finit, finit[[-1]] & /@ Range[15] ];
+
+Export["fourier.gif", fors , ImageResolution -> 200, 
+ "DisplayDurations" -> 
+  Join[.5 & /@ Range[9], {2}, .05 & /@ Range[Length[fors] - 10]  ], 
+ "AnimationRepetitions" -> Infinity   ]
