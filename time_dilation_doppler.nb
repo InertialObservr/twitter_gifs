@@ -11,8 +11,6 @@ vel[t_] := D[eight[T], T] /. T -> t
 
 \[Lambda][t_, \[Lambda]0_: 425] := \[Lambda]0/Sqrt[1 - \[Beta][t]^2  ];
 
-min = FindMinimum[\[Lambda][t], {t, 0, 2 \[Pi]}][[1]];
-max = FindMaximum[\[Lambda][t], {t, 0, 2 \[Pi]}][[1]];
 
 shift[t_] := ColorData["VisibleSpectrum"][ \[Lambda][t]]
 
