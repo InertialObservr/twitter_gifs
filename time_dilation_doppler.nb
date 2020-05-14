@@ -1,0 +1,157 @@
+Clear[eight, sphere, vel, shift, clock, time, circ, disk, 
+  hand, \[Omega], faceAt, rest];
+
+\[Omega]0 = .7;
+\[Theta]0 = 12.927126478332095;
+
+eight[t_] := { 
+  Sin[\[Omega]0 t], .6 Sin[\[Omega]0 t] Cos[\[Omega]0 t] - .2 , 0}
+vel[t_] := D[eight[T], T] /. T -> t
+\[Beta][t_] := Sqrt[vel[t].vel[t]]
+
+\[Lambda][t_, \[Lambda]0_: 425] := \[Lambda]0/Sqrt[1 - \[Beta][t]^2  ];
+
+min = FindMinimum[\[Lambda][t], {t, 0, 2 \[Pi]}][[1]];
+max = FindMaximum[\[Lambda][t], {t, 0, 2 \[Pi]}][[1]];
+
+shift[t_] := ColorData["VisibleSpectrum"][ \[Lambda][t]]
+
+sphere [t_] := Graphics3D[{shift[t], Sphere[eight[t] , 0.075] }]
+
+
+
+
+\[Theta][t_, \[Omega]0_: \[Omega]0 ] := 
+ NIntegrate[\[Omega]0 Sqrt[1 - \[Beta][\[Tau]]^2], {\[Tau], 0, t}]
+
+
+faceAt[center_: {0, .6, 0}] := 
+  Graphics3D[Cylinder[{center, {center[[1]], center[[2]], -.01}}, .1]];
+
+hand[t_, center_: {0, .22, 0}, color_: Black, thick_: .008] := 
+ Graphics3D[{ color, Thickness[thick], 
+   Line[{center, 
+     center + .1 {Cos[-\[Theta][t]], Sin[-\[Theta][t]], 0}}]  }]
+
+rest[t_, center_: {0, .9, 0}] := 
+ Graphics3D[{Thickness[.008], 
+   Line[{center, 
+     center + .1 {Cos[-\[Omega]0 t], Sin[-\[Omega]0 t], 0}}] }]
+
+
+
+
+FindRoot[\[Theta][t] == 2 \[Pi], {t, 2 \[Pi]}]
+
+
+t2f = 11.125458756084335;
+
+eightPlot = 
+  ParametricPlot3D[eight[t], {t , 0 , 2 \[Pi]/\[Omega]0}, 
+   PlotStyle -> {White, Opacity[.7]}];
+
+
+
+clean[t_] := Limit[ 1/(1 + E^(-3*Tan[\[Pi] (T - .5)])), T -> t]
+
+
+Clear[anim];
+
+anim[t_, color_: Black, thick_: .008] := 
+  Show[faceAt[face], faceAt[rst], eightPlot, sphere[t], 
+   hand[t, face, color, thick], rest[t, rst], 
+   Graphics3D[{ColorData["VisibleSpectrum"][425], 
+     Sphere[{.45, .8, 0} , .075]} ],
+   Graphics3D[{ColorData["VisibleSpectrum"][\[Lambda][t]], 
+     Sphere[{.45, .5, 0} , .075]} ],
+   
+    ViewPoint -> {0, 0, 2}, 
+   PlotRange -> 1.1 {{-1, 1}, {-1, 1}, {-.1, .1}}  , 
+   Background -> Darker[Gray, .5], Boxed -> False,
+   
+   Epilog -> {Style[
+      Text[ "v = " <> ToString[NumberForm[\[Beta][t], {3, 3}]] <> 
+        "c", {.5, .1}], 16, White, Italic, 
+      FontFamily -> "Geeza Pro"  ], 
+     Style[Text["They see: ", {.3, .86}], 14, White  , 
+      FontFamily -> "Georgia"], 
+     Style[Text["You see: ", {.3, .73}], 14 , White, 
+      FontFamily -> "Georgia" ] , 
+     Style[Text["@InertialObservr", {.88, .97}], 10 , 
+      FontFamily -> "Georgia", Lighter[Green, .7] ]}];
+
+send[t_, color_: Black, thick_: .008] := 
+  Show[faceAt[face], faceAt[rst], eightPlot, 
+   sphere[2 \[Pi]/\[Omega]0], hand[t, face, color, thick], 
+   rest[2 \[Pi]/\[Omega]0, rst], 
+   Graphics3D[{ColorData["VisibleSpectrum"][425], 
+     Sphere[{.45, .8, 0} , .075]} ],
+   Graphics3D[{ColorData["VisibleSpectrum"][\[Lambda][
+       2 \[Pi]/\[Omega]0]], Sphere[{.45, .5, 0} , .075]} ],
+   
+    ViewPoint -> {0, 0, 2}, 
+   PlotRange -> 1.1 {{-1, 1}, {-1, 1}, {-.1, .1}}  , 
+   Background -> Darker[Gray, .5], Boxed -> False,
+   
+   Epilog -> {Style[
+      Text[ "v = " <> ToString[NumberForm[\[Beta][t], {3, 3}]] <> 
+        "c", {.5, .1}], 16, White, Italic, 
+      FontFamily -> "Geeza Pro"  ], 
+     Style[Text["They see: ", {.3, .86}], 14, White  , 
+      FontFamily -> "Georgia"], 
+     Style[Text["You see: ", {.3, .73}], 14 , White, 
+      FontFamily -> "Georgia" ] , 
+     Style[Text["@InertialObservr", {.88, .97}], 10 , 
+      FontFamily -> "Georgia", Lighter[Green, .7] ]}];
+
+
+grow[t_] := 
+ anim[2 \[Pi]/\[Omega]0, 
+  Blend[{Black, Red}, clean[t]], .008 + (.012 - .008)*clean[t] ]
+rot[t_] := send[
+  2 \[Pi]/\[Omega]0 + (t2f - 2 \[Pi]/\[Omega]0)*clean[t], Red, .012]
+final[t_] := 
+ send[t2f, 
+  Blend[{Red, Black}, clean[t]], .012 + (.008 - .012)*clean[t] ]
+
+dat2 = Table[grow[t], {t, 0, 1, .05}];
+
+
+dat3 = Table[rot[t], {t, 0, 1, 1/10}];
+
+Clear[anim2];
+
+anim2[t_] := Module[{},
+  
+  If[t < 1, Return@grow[t]];
+  If[1 <= t < 2, Return@rot[t - 1]];
+  If[2 <= t < 3, Return@final[t - 2]];
+  
+  ]
+
+
+growShift = Table[anim2[t], {t, 0, 3, 3/100}];
+
+
+nFrames = 500;
+upper = 2 \[Pi]/\[Omega]0;
+step =  2 \[Pi]/(\[Omega]0 * nFrames);
+
+
+
+ts = Range[1, Length[growShift], step];
+ints = IntegerString[#, 10, 6] & /@ Range[5*Length[ts]];
+
+For[ix = 502, ix <= Length[ts], ix++, 
+ 
+ Export["./rel2/" <> ToString[ints[[ix]]] <> ".png", anim[ts[[ix]]], 
+  ImageResolution -> 300 ]
+ 
+ ]
+
+For[ix = 1, ix <= Length[Range[growShift]], ix++, 
+ 
+ Export["./rel2/" <> ToString[ints[[501 + ix]]] <> ".png", 
+  growShift[[ix]] , ImageResolution -> 300 ]
+ 
+ ]
