@@ -1,0 +1,184 @@
+ClearAll["Global`*"]
+Clear[Derivative]
+
+Clear[fPlanet, planet, Rhat, \[Theta]];
+
+mo = .01;
+fPlanet = - ((1*mo)/r[t]^2)* {Sin[\[Theta][t]], 0 , Cos[\[Theta][t]] };
+R = r[t] *{Sin[\[Theta][t]], 0, Cos[\[Theta][t]]};
+rddot = D[R, {t, 2}] // Simplify;
+
+planet = Graphics3D[{Lighter[Blue, .3], Sphere[{0, 0, 0}, .5]}];
+
+Clear[rSol, \[Theta]Sol, fix, solve];
+
+
+
+
+solve[\[Theta]prime_: 2] := Module[{R, theta},
+  
+  
+  {R, theta} = Flatten[  
+     
+     NDSolve[ {fPlanet[[1]] == (mo*rddot[[1]]) , 
+       fPlanet[[3]] == (mo*rddot[[3]]), 
+       WhenEvent[r[t] <= .5, "StopIntegration"], \[Theta][0] == 
+        0, \[Theta]'[0] == \[Theta]prime,  r[0] == .5 + .1, 
+       r'[0] == 0 } , {r, \[Theta]}, {t, 0, 30}]
+     
+     ][[All, 2]] ;
+  
+  Return[{R, theta}]
+  
+  ]
+
+
+
+
+fix[t_, rsol_, \[Theta]sol_] := Module[{tf}, 
+  
+  tf = Flatten[rsol[[1]]][[2]];
+  
+  If[t < tf, Return[{rsol[t], \[Theta]sol[t], tf}] , 
+   Return[{rsol[tf], \[Theta]sol[tf], tf}]]
+  
+  ]
+
+
+
+
+
+Clear[toPlot];
+
+toPlot[t_, \[Theta]prime_: 2] := 
+ Module[{\[Rho], \[CapitalTheta], \[Rho]Fix, \[CapitalTheta]Fix, tf},
+  
+  {\[Rho], \[CapitalTheta]} = solve[\[Theta]prime];
+  {\[Rho]Fix, \[CapitalTheta]Fix, tf} = 
+   fix[t, \[Rho], \[CapitalTheta]];
+  
+  Return[{\[Rho]Fix, \[CapitalTheta]Fix, tf}]
+  
+  ]
+
+
+Clear[ball, line];
+
+ball[t_, \[Theta]prime_: 2] := Module[{\[Rho], \[CapitalTheta], tf},
+  
+  {\[Rho], \[CapitalTheta], tf} = toPlot[t, \[Theta]prime];
+  
+  
+   Graphics3D[ 
+   
+   Sphere[  \[Rho]*{Sin[\[CapitalTheta]], 0, 
+      Cos[\[CapitalTheta]]}, .025]
+   
+   ]
+  
+  ]
+
+line[t_, \[Theta]prime_: 2] :=  
+ Module[{\[Rho], \[CapitalTheta], tup, line, tf, tLast},
+  
+  tup[T_] := toPlot[T, \[Theta]prime];
+  tf = toPlot[.2, \[Theta]prime][[3]];
+  
+  If[t > tf, tLast = tf, tLast = t];
+  
+  Graphics3D[
+   {Hue[(\[Theta]prime - \[Theta]min)/(\[Theta]max - \[Theta]min)], 
+    Opacity[.6],
+    Tube[ 
+     Table[ 
+      tup[T][[1]]*{Sin[tup[T][[2]]], 0, Cos[tup[T][[2]]]} , 
+      
+      {T, 0.001, tLast, (tLast - .001)/200}
+      ]
+     , .006]
+    }
+   
+   ]
+  
+  ]
+
+Clear[balls, lines];
+
+\[Theta]min = 1.5;
+\[Theta]max = 3.5;
+balls[t_] := ball[t, #] & /@ Range[\[Theta]min, \[Theta]max, .2];
+lines[t_] := line[t, #] & /@ Range[\[Theta]min, \[Theta]max, .2];
+
+starsY = Table[
+   
+   Graphics3D[  
+    
+    { White, PointSize[RandomReal[{.001, .005}]], 
+     Point[{RandomReal[5 {-1, 1}], 1.5 + RandomReal[{-.2, .2}], 
+       RandomReal[5 {-1, 1}]}]  }  
+    
+    ]
+   , {i, 1, 500}
+   ];
+
+starsZ = Table[
+   
+   Graphics3D[  
+    
+    { White, PointSize[RandomReal[{.001, .005}]], 
+     Point[{RandomReal[5 {-1, 1}], RandomReal[5 {-1, 1}], 
+       1.5 + RandomReal[{-.2, .2}]}]  }  
+    
+    ]
+   , {i, 1, 500}
+   ];
+
+
+Clear[plot];
+
+plot[t_, vp_: {0, -2, 0}] := 
+  Show[lines[t], planet, balls[t], starsY, starsZ, ViewPoint -> vp, 
+   PlotRange -> 2 {{-1, 1}, {-1, 1}, {-1, 1}}, ViewAngle -> 0.32, 
+   Background -> Black, Boxed -> False, ImageSize -> .5*{800, 600}];
+
+
+xf = 0.00016741669955841427`;
+yf = -0.7206710156932725`;
+zf = -1.6524627859989087`;
+vvf = {xf, yf, zf};
+
+clean[t_] := Limit[ 1/(1 + E^(-3*Tan[\[Pi] (T - .5)])), T -> t];
+
+
+
+pan[t_] := Module[{vf, v0, v, \[CapitalDelta]t},
+  
+  vf = vvf;
+  v0 = {0, -2, 0};
+  
+  If[t < 7, Return[plot[t, v0] ]];
+  
+  If[7 <= t < 12, 
+   
+   \[CapitalDelta]t = (t - 7)/(12 - 7);
+   v = v0 + (vf - v0)*clean[\[CapitalDelta]t];
+   Return[plot[t, v]]
+   ];
+  
+  If[t >= 12, Return[plot[t, vf]] ];
+  
+  
+  ]
+
+
+ts = Range[0, 25, 25/1300];
+ints = IntegerString[#, 10, 6] & /@ Range[5*Length[ts]];
+
+
+
+For[ix = 1, ix <= Length[ts], ix++, 
+ 
+ Export["./to_fix/" <> ToString[ints[[ ix ]]  ] <> ".png", 
+  pan[   ts[[  ix  ]]   ], ImageResolution -> 300 ]
+ 
+ ]
