@@ -1,0 +1,92 @@
+(*Easing fucntions*)
+
+Clear[easy];
+(*Ease in and out*)
+easy[\[Alpha]_] := Module[{},
+  If[\[Alpha] == 0, Return[0]];
+  If[\[Alpha] == 1, Return[1]]; 
+  Limit[1/(1 + Exp[-3*Tan[\[Pi] (x - 1/2)]]), x -> \[Alpha]]
+  ]
+
+(*Ease in and speed up til end*)
+runAway[\[Alpha]_] := Module[{},
+  Return[\[Alpha]^7]
+  ]
+
+
+
+Clear[circ]
+(*Color circle based on radius*)
+
+circ[\[Theta]_, R_: 1] := 
+ Graphics[{Hue[R], Circle[{0, 0}, R, {-\[Pi]/2, \[Theta]}]}]
+
+Clear[tl];
+(*Unraveling function that preserves arc length*)
+
+tl[\[Theta]_, R_: 1] := 
+ Module[{\[CurlyPhi] = \[Theta], 
+   tanVec, \[CapitalDelta]\[Theta], \[CapitalDelta]s, cutPt, 
+   lineEnd},
+  
+  
+  \[CapitalDelta]\[Theta] = -\[Theta] + 3 \[Pi]/2;
+  \[CapitalDelta]s = R*\[CapitalDelta]\[Theta];
+  
+  tanVec = {-Sin[\[CurlyPhi]], Cos[\[CurlyPhi]]};
+  cutPt = {R*Cos[\[CurlyPhi]], R*Sin[\[CurlyPhi]]};
+  lineEnd = cutPt + \[CapitalDelta]s*tanVec;
+  
+  Graphics[{Hue[R], Line[{cutPt, lineEnd }]}]
+  
+  ]
+
+
+
+Clear[all]
+all[\[Theta]_, op_: 0, slices_: 10] := Module[{},
+  
+  
+  Show[{circ[\[Theta], #], tl[\[Theta], #]} & /@ 
+    Range[1/slices, 1, 1/slices], PlotRange -> {{-3, 7}, {-2, 4.5}}, 
+   Background -> Black, 
+   Epilog -> {Style[Text["r", {-.3, -.5}], Opacity[op], White, 
+      FontFamily -> "Georgia", Italic, FontSize -> 14], 
+     Style[Text["2\[Pi] r", {2.8, -1.25}], Opacity[op], White, 
+      FontFamily -> "Georgia", Italic, FontSize -> 14]}
+   ]
+  ]
+
+
+PrevDat = 
+  Table[all[3 \[Pi]/2 + -easy[t] ((3 \[Pi])/2 - (-\[Pi]/2)), 0, 
+    10], {t, 0, 1, 1/150}];
+
+
+fadein = Table[all[-\[Pi]/2, N@easy[k], 10], {k, 0, 1, 1/25}];
+
+build =  Table[
+   all[-\[Pi]/2, 1, 10 +  runAWay[t] *(100 - 10)], {t, 0, 1, 1/70}];
+
+fout = Table[all[-\[Pi]/2, 1 - N@easy[k], 100], {k, 0, 1, 1/25}];
+
+back = Table[
+   all[-(\[Pi]/2) + easy[t] (\[Pi]/2 + ((3 \[Pi])/2)), 0, 100], {t, 
+    0, 1, 1/150}];
+
+unslice = 
+  Table[all[(3 \[Pi])/2, 0, 100 +  easy[t] *(10 - 100)], {t, 0, 1, 
+    1/30}];
+
+dat = Join[PrevDat, fadein, build, fout, back, 
+   unslice, (unslice[[-1]] & /@ Range[10])];
+
+
+(*Test animation*)
+ListAnimate[dat]
+
+
+(*export animation as gif*)
+
+Export["circleArea.gif", dat , ImageResolution -> 300, 
+ "AnimationRepetitions" -> Infinity]
