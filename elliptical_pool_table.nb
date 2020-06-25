@@ -1,0 +1,107 @@
+a = 1.25;
+ellip = Graphics[{Darker[Gray, .5], Disk[{0, 0}, {a, 1}]}];
+wall = Graphics[{Lighter[White], Thickness[.025], 
+    Circle[{0, 0}, 1.03*{a, 1}]}];
+foc = Sqrt[a^2 - 1^1];
+pockets = 
+  Graphics[{{White, Disk[{-foc, 0}, .025]}, Disk[{foc, 0}, .05]}];
+
+ball = Lighter[Green, .5];
+line = Opacity[.4, White];
+ps = .01;
+
+Clear[initPath];
+initPath[t_, \[Theta]_: \[Pi]/2, a_: a] := Module[{r0, rf, v, tf},
+  r0 =  {-foc, 0};
+  rf = {a*Cos[\[Theta]], Sin[\[Theta]]} ;
+  
+  v =  (rf - r0 )/Norm[(rf - r0 )];
+  
+  tf = Norm[rf - r0]/Norm[v];
+  
+  Graphics[ { {line, Line[{r0, r0 + v*t }]} , {ball, 
+     Opacity[1 - .99 HeavisideTheta[t - tf + .0001]], PointSize[ps], 
+     Point[r0 + v*t]}  }]
+  
+  ]
+
+Clear[bouncePath];
+
+bouncePath[t_, \[Theta]_: \[Pi]/2, a_: a] := 
+ Module[{r0, vhat, vmag, tf, rf},
+  
+  r0 = {a*Cos[\[Theta]], Sin[\[Theta]]} ;
+  
+  rf = {foc, 0};
+  
+  vhat =  (rf - r0)/Norm[rf - r0] ;
+  
+  vmag = Norm[{a*Cos[\[Theta]], Sin[\[Theta]]} - {-foc, 0}]/
+   Norm[Norm[{a*Cos[\[Theta]], Sin[\[Theta]]} - {-foc, 0}]];
+  
+  tf = Norm[rf - r0]/Norm[vmag] ;
+  
+  If[t <= tf,
+   Graphics[ { {line, Line[{r0, r0 + vhat*vmag*t }] }, {ball, 
+      PointSize[ps], Point[r0 + vhat*vmag* t]}   } ], 
+   
+   Graphics[ { {line, Line[{r0, r0 + vhat*vmag*tf }] }, {ball, 
+      PointSize[ps], Point[r0 + vhat*vmag* tf]}   } ]
+   
+   ]
+  
+  ]
+
+
+Clear[path]
+path[t_, \[Theta]_: \[Pi]/2, a_: a] := Module[{t1, r1, r0, v},
+  
+  r0 =  {-foc, 0};
+  r1 = {a*Cos[\[Theta]], Sin[\[Theta]]} ;
+  
+  v =  (r1 - r0 )/Norm[(r1 - r0 )];
+  
+  t1 = Norm[(r1 - r0)]/Norm[v];
+  
+  If[t <= t1, Return[initPath[t, \[Theta], a]]];
+  If[t1 < t <= 5, 
+   Return[{initPath[t1, \[Theta], a], 
+     bouncePath[t - t1, \[Theta], a]}] ]
+  
+  ]
+
+
+Clear[direct];
+direct[t_] := Module[{r0, v, tf, rf},
+  
+  r0 =  {-foc, 0};
+  rf = {foc, 0};
+  v =  rf - r0 ;
+  tf = Norm[rf - r0]/Norm[v];
+  
+  
+  If[t <= tf,
+   Graphics[ { {line, Line[{r0, r0 + v*t }]} , {ball, Opacity[1], 
+      PointSize[ps], Point[r0 + v t]}  }],
+   
+   Graphics[ { {line, Line[{r0, r0 + v*tf }]} , {ball, Opacity[1], 
+      PointSize[ps], Point[r0 + v *tf]}  }]
+   
+   ]
+  
+  
+  ]
+
+
+Clear[shoot]
+shoot[t_] := 
+ Show[ellip, wall, pockets, 
+  path[t, #] & /@ 
+   Range[2 \[Pi]/40, 2 \[Pi] - 2 \[Pi]/40, 2 \[Pi]/40], 
+  Background -> Black, ImageSize -> {600, 400}, 
+  Epilog -> 
+   Style[Text["@InertialObservr", {1.10, -1.02}], 12, White, 
+    FontFamily -> "Georgia"]]
+
+tEnd = 2.845;
+Manipulate[shoot[ t], {t, 0, tEnd}]
