@@ -1,0 +1,58 @@
+square[at_, col_] := Graphics[{col, Rectangle[at]}]
+
+
+Clear[row];
+
+row[y_, lighter_: White, darker_: Gray] := Module[{col1, col2},
+  If[Mod[y, 2] == 0, col1 = lighter; col2 = darker, col1 = darker; 
+   col2 = lighter];
+  
+  Show[square[{#, y}, col1] & /@ Range[0, 10, 2], 
+   square[{#, y}, col2] & /@ Range[1, 9, 2] ]
+  
+  ]
+
+Clear[cross];
+
+cross[at_, col_: Black, \[Theta]_: 0] := Module[{line1, line2, a = .2},
+  
+  line1 = 
+   Line[{at + RotationMatrix[\[Theta]].{0, -a}, 
+     at + RotationMatrix[\[Theta]].{0, a}}];
+  line2 = 
+   Line[{at + RotationMatrix[\[Theta]].{-a, 0}, 
+     at + RotationMatrix[\[Theta]].{a, 0}}];
+  
+  Graphics[
+   
+   {col, Thickness[.01], line1, line2}
+   
+   ]
+  
+  ]
+
+
+Clear[crossDiag];
+
+crossDiag[base_: {0, 0}, op_: 1, \[Theta]_: 0] :=  Module[{col},
+  
+  If[Mod[ Norm[base - {0, 0}], 3] == 0,  col = Lighter[Gray, .7], 
+   col = Lighter[Gray, .05]];
+  
+  Flatten@
+   Table[cross[base + {step, step}, 
+     Opacity[op, col], \[Theta]], {step, 0, 10}]
+  
+  ]
+
+
+Clear[func]
+func[\[Theta]_, op_] :=
+ 
+ Show[row[#, Lighter[Gray, .5], Lighter[Gray, .2]] & /@ Range[0, 10], 
+  crossDiag[{#, 0}, op, \[Theta]] & /@ Range[0, 10]   , 
+  crossDiag[{0, #}, op, \[Theta]] & /@ Range[0, 10] , 
+  PlotRange -> {{0, 10}, {0, 10}}]
+
+
+Manipulate[func[\[Theta], op], {\[Theta], 0, \[Pi]/2}, {op, 0, 1}]
