@@ -1,0 +1,170 @@
+Clear[arr];
+
+arr[from_, to_, t_: 1, col_: Black] := Module[{r},
+  
+  r = from + t (to - from);
+  
+  Graphics[{col, Thickness[.005], Arrow[{from, r}]}]
+  
+  ]
+
+
+Clear[easy]
+easy[\[Alpha]_] := Module[{},
+  If[\[Alpha] == 0, Return[0]];
+  If[\[Alpha] == 1, Return[1]]; 
+  N@ Limit[1/(1 + Exp[-3*Tan[\[Pi] (x - 1/2)]]), x -> \[Alpha]]
+  ]
+
+
+Clear[morph];
+
+morph[h_: 1, rotParam_: 0, op_: 1, approx_: False] := 
+ Module[{from1, to1, from2, to2, from3, to3, midp1, label1Pos, norm1, 
+   midp2, norm2, label2Pos, label3Pos, fullAng1,  fullAng2, 
+   shift = -.05, size = 28, xshift = .1, color = Lighter[Green, .6]},
+  from1 = {0, 0} ;
+  to1 = {1, h};
+  
+  fullAng1 = \[Pi] - ArcCos[(- to1/Norm[to1]).{1, 0}];
+  
+  from1 =   to1 + RotationMatrix[-rotParam*fullAng1]. (-to1);
+  
+  
+  from2 = to1;
+  to2 = {3, 0};
+  fullAng2 =  ArcCos[(( to2 - from2)/Norm[to2 - from2]).{1, 0}];
+  to2 =  to1 + RotationMatrix[rotParam*fullAng2]. (to2 - from2);
+  
+  from3 = {0, 0};
+  to3 = {3, 0};
+  
+  midp1 = (from1 + to1)/1.75;
+  norm1 = RotationMatrix[\[Pi]/2].(.2*to1/Norm[to1]);
+  label1Pos = norm1 + midp1;
+  
+  midp2 = (from2 + to2)/2;
+  norm2 = RotationMatrix[\[Pi]/2].(.3*to2/Norm[to2]);
+  
+  label2Pos = norm2 + midp2;
+  
+  label3Pos = to3/2 + {-.3, -.2};
+  
+  Show[Graphics[{Opacity[.6], Lighter[Blue, .7], 
+     Triangle[{{0, 0}, {1, h}, {3, 0}}]}], 
+   arr[from1, to1, 1, Lighter[Green, .6] ], 
+   arr[from2, to2, 1, Lighter[Red, .6]], arr[from3, to3, 1, White], 
+   
+   
+   Epilog -> {Style[Text["x", label1Pos], color, 
+      FontFamily -> "Georgia", size],
+     Style[Text["y", label2Pos], Lighter[Red, .6], 
+      FontFamily -> "Georgia", size],
+     
+     Style[Text["x", label3Pos + {-.2, shift}], Lighter[Green, .6], 
+      FontFamily -> "Georgia", size],
+     Style[Text["+", label3Pos + {-.05, shift}], White, 
+      FontFamily -> "Georgia", size],
+     Style[Text["y", label3Pos + {.1, shift}], Lighter[Red, .6], 
+      FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {-.3, shift}], Opacity[op] , White, 
+      FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {.2, shift}], Opacity[op] , White, 
+      FontFamily -> "Georgia", size],
+     
+     Style[
+      Text[If[approx, "\[TildeTilde]", "\[LessEqual]"], 
+       label3Pos + {.35, shift}], Opacity[op] , White, 
+      FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {.5, shift}], Opacity[op] , White, 
+      FontFamily -> "Georgia", size],
+     Style[Text["x", label3Pos + {.5 + xshift, shift}], Opacity[op] , 
+      Lighter[Green, .6], FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {.5 + 2*xshift, shift}], 
+      Opacity[op] , White, FontFamily -> "Georgia", size],
+     Style[Text["+", label3Pos + {.5 + 3*xshift, shift}], 
+      Opacity[op] , White, FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {.5 + 4*xshift, shift}], 
+      Opacity[op] , White, FontFamily -> "Georgia", size],
+     Style[Text["y", label3Pos + {.5 + 5*xshift, shift}], 
+      Opacity[op] , Lighter[Red, .6], FontFamily -> "Georgia", size],
+     Style[Text["|", label3Pos + {.5 + 6*xshift, shift}], 
+      Opacity[op] , White, FontFamily -> "Georgia", size]
+     
+     
+     },
+   
+   
+   PlotRange -> {{-.65, 3.5}, {-.5, 1.5}}, 
+   Background -> Darker[Gray], ImageSize -> {600, 400}]
+  
+  ]
+
+Manipulate[morph[h, 0, 0, False], {h, 1, .1}]
+
+multipFrames = 2;
+
+freeze = morph[1, 0, 0, False] & /@ Range[multipFrames*10];
+
+open1 = morph[1, easy[#], 0, False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+fin1 = morph[1, 1, easy[#], False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+freeze2 = fin1[[-1]] & /@ Range[multipFrames*15];
+
+closeAndFadeOut = 
+  morph[1, 1 - easy[#], 1 - easy[#], False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+pause2 = closeAndFadeOut[[-1]] & /@ Range[0, 1, 1/(multipFrames*5)];
+
+makeShorter = 
+  morph[1 + easy[#] (.6 - 1), 0, 0, False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+pause25 = makeShorter[[-1]] & /@ Range[0, 1, 1/(multipFrames*5)];
+
+open2 = morph[.6, easy[#], easy[#], False] & /@ 
+   Range[0, 1, 1/(multipFrames*20)];
+
+pause3 = open2[[-1]] & /@ Range[0, 1, 1/(multipFrames*15)];
+
+close2 =  
+  morph[.6, 1 - easy[#], 1 - easy[#], False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+pause4 = close2[[-1]] & /@ Range[0, 1, 1/(multipFrames*5)];
+
+makeShorter2 = 
+  morph[.6 + easy[#] (.1 - .6), 0, 0, False] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+open3 = morph[.1, easy[#], easy[#], True] & /@ 
+   Range[0, 1, 1/(multipFrames*20)];
+
+pause5 = open3[[-1]] & /@ Range[0, 1, 1/(multipFrames*15)];
+
+close3 = morph[.1, 1 - easy[#], 1 - easy[#], True] & /@ 
+   Range[0, 1, 1/(multipFrames*15)];
+
+pause6 = close3[[-1]] & /@ Range[0, 1, 1/(multipFrames*5)];
+
+backToStart = 
+  morph[.1 + easy[#] (1 - .1), 0, 0, False] & /@ 
+   Range[0, 1, 1/(multipFrames*20)];
+
+anim = Join[freeze, open1, fin1, freeze2, closeAndFadeOut, pause2, 
+   makeShorter, pause25, open2, pause3, close2, pause4, makeShorter2, 
+   open3, pause5, close3, pause6, backToStart];
+
+For[ix = 1, ix <= Length[anim], ix++, 
+ 
+ Export["./tri_in/" <> ToString[ IntegerString[ix, 10, 6]  ] <> ".png",
+   
+   anim[[ix]],
+   
+   ImageResolution -> 200];
+ 
+ ]
