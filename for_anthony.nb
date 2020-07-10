@@ -1,0 +1,23 @@
+Clear[taylor, x];
+
+taylor[f_, x_, N_: 5, x0_: 0] := 
+ Sum[(D[f[X], {X, n}] /. {X -> x0})/n! (xx - x0)^n, {n, 0, 
+    N}] /. {xx -> x}
+
+Clear[plotNthTerm];
+
+plotNthTerm[f_, N_: 5, x0_: 0] := Plot[taylor[f, x, N], {x, -5, 5},
+  Epilog -> Style[Text["N = " <> ToString[N], {2, .9}], White, 16], 
+  Background -> Black,
+  AxesStyle -> White, PlotStyle -> Hue[N/10], 
+  PlotRange -> {{-5, 5}, {-5, 5}},  ImageSize -> {600, 400}]
+
+
+cosAnim = plotNthTerm[Cos, #] & /@ Range[0, 10, 2];
+expAnim = plotNthTerm[Exp, #] & /@ Range[0, 10];
+
+
+ListAnimate[cosAnim]
+
+
+ListAnimate[expAnim]
