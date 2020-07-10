@@ -102,6 +102,12 @@ morph[h_: 1, rotParam_: 0, op_: 1, approx_: False] :=
 
 Manipulate[morph[h, 0, 0, False], {h, 1, .1}]
 
+
+
+
+(* Below is constructing the animation as I put it together on Twitter. Not needed if you just want to play with it *)
+
+
 multipFrames = 2;
 
 freeze = morph[1, 0, 0, False] & /@ Range[multipFrames*10];
@@ -158,6 +164,11 @@ backToStart =
 anim = Join[freeze, open1, fin1, freeze2, closeAndFadeOut, pause2, 
    makeShorter, pause25, open2, pause3, close2, pause4, makeShorter2, 
    open3, pause5, close3, pause6, backToStart];
+
+
+ListAnimate[anim]
+
+(* Below is exporting the animation. Need to creade directory called tri_in *)
 
 For[ix = 1, ix <= Length[anim], ix++, 
  
