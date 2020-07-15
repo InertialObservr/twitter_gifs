@@ -1,0 +1,93 @@
+Clear[block]
+
+slitDist = 10;
+slitHeight = 10;
+
+thickness = 1;
+w = 1;
+ycMin = -.5;
+ycMax = .5;
+ylMin = ycMax + w;
+yrMin = ycMin - w;
+
+ylCenter = (ylMin + ycMax)/2;
+yrCenter = (yrMin + ycMin)/2;
+
+colorWall = Opacity[1, White];
+specWall = Specularity[100];
+
+
+cBar = Graphics3D[{EdgeForm@None, colorWall, specWall, 
+    Cuboid[{slitDist, -.5, -slitHeight/2}, {slitDist + thickness, .5, 
+      slitHeight/2}]}];
+
+lBar[w_: w] := 
+  Graphics3D[{EdgeForm@None, colorWall, specWall, 
+    Cuboid[{slitDist, .5 + w, -slitHeight/2}, {slitDist + thickness, 
+      6 + w, slitHeight/2}]}];
+
+rBar[w_: w] := 
+  Graphics3D[{EdgeForm@None, colorWall, specWall, 
+    Cuboid[{slitDist, -.5 - w, -slitHeight/2}, {slitDist + 
+       thickness, -6 - w, slitHeight/2}]}];
+
+block[w_: w] := 
+ Graphics3D[{EdgeForm@None, colorWall, specWall, 
+   Cuboid[{slitDist - thickness + .7, -.5 - w, -slitHeight/
+      2}, {slitDist + thickness - thickness, .5 - w, slitHeight/2}]}]
+
+det = Graphics3D[{EdgeForm@None, colorWall, specWall, 
+    Cuboid[{slitDist + 14, -9, -slitHeight/2}, {slitDist + 
+       thickness + 14 , 9, slitHeight/2}]}];
+
+floor = Plot3D[-5, {x, -10, 50}, {y, -15, 20}, Mesh -> None, 
+   PlotStyle -> {Thick, White, Specularity[10], Opacity[.2]}];
+plot = Show[lBar[], rBar[], det];
+
+mkSphere[x_, y_] := 
+ If[x >= slitDist && Abs[y] > 2 (w - .25), 
+  Return[Sphere[{slitDist, y, 0}, .1]],
+  Return[Sphere[{x, y, 0}, .1]]
+  ]
+
+lineOfSpheres[x_] := 
+ Graphics3D[{Lighter[Yellow, .5], mkSphere[x, #]} & /@ 
+   Range[-6, 6, .2]]
+
+waveSeg [y0_: 0, x0_: 10.5, tf_: .7] := 
+ Module[{r0, rf, pts, r1, r2, r, dist, tfinal, time},
+  
+  r0 = {x0, y0, 0};
+  
+  
+  rf[T_, \[Theta]_: 0] :=  
+   RotationMatrix[\[Theta], {0, 0, 1}].{ T (slitDist + 14), T y0, 
+     Sin[8 \[Pi] T ]};
+  
+  r[\[Tau]_, \[Theta]_: 0] := 
+   r0 + (rf[\[Tau], \[Theta]] - \[Tau] r0);
+  
+  pts[T_] := {Yellow, Opacity[.4], Specularity[0], 
+      Tube[{r[T, #], r[T + .01, #]}, .03]} & /@ 
+    Range[-\[Pi]/10, \[Pi]/10, \[Pi]/30];
+  
+  
+  Graphics3D[
+   pts /@ Range[0, tf, .01]
+   
+   ]
+  
+  ]
+
+Clear[all];
+
+all =
+  Show[plot, floor, lineOfSpheres[10.5], 
+  waveSeg[#] & /@ Range[-1, 1, .2], Axes -> False, 
+  Background -> Black, 
+  ViewPoint -> 
+   RotationMatrix[-\[Pi]/7 + \[Pi]/1.35, {0, 0, 
+      1}].{-1.2, .95, .95},  ViewAngle -> \[Pi]/15, 
+  PlotRange -> {{-2.5, 30}, {-25, 25}, {-5, 5}}, 
+  Lighting -> {{"Point", White, {-5, 15, 70}}}, Boxed -> False, 
+  AspectRatio -> Automatic, ImageSize -> {600, 400}]
