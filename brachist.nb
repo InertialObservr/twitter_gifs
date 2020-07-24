@@ -88,6 +88,6 @@ plotBrach[t_] := Module[{tf, xSol, ySol},
 
 shw[t_] := Show[br, plotTrack[t, # ] & /@ tracks, plotBrach[t]];
 
-frames = shw /@ Range[0, Max[], Max[tt /@ tracks]/750];
+frames = shw /@ Range[0, Max[tt /@ tracks] , Max[tt /@ tracks]/750];
 
 ListAnimate[frames]
