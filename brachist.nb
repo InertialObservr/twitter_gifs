@@ -1,0 +1,93 @@
+Clear[x, y];
+x[\[Theta]_, k_ : 1] := 1/2 k^2*(\[Theta] - Sin[\[Theta]]);
+y[\[Theta]_, k_ : 1] := -(1/2) k^2*(1 - Cos[\[Theta]]);
+g = 9.8;
+
+Y = -((1 - E^(-n  X[t]) )/(1 - E^(-n \[Pi]/2)));
+
+Clear[L];
+
+L = 1/2 (X'[t]^2 + D[Y, t]^2 ) - g * Y;
+
+lhs = D[D[ L, X'[t]], t];
+
+rhs = D[L, X[t]];
+
+Clear[X, sol, Derivative];
+sol[N_] := Module[{LHS, RHS, res, why},
+  
+  LHS = lhs /. n -> N ;
+  RHS = rhs /. n -> N;
+  res = Flatten[ 
+    NDSolve[{LHS == RHS, X[0] == 0, X'[0] == 0, 
+      WhenEvent[X[t] == \[Pi]/2, "StopIntegration"]}, X, {t, 0, 10}, 
+     MaxStepSize -> 1/1000] ];
+  
+  Return[res[[1, 2]]]
+  
+  ]
+
+Lb = 1/2 (D[x[\[Theta][t]], t]^2 + D[y[\[Theta][t]], t]^2 ) - 
+   g*y[\[Theta][t]];
+
+LHS1 = D[D[Lb, \[Theta]'[t]], t];
+RHS1 = D[Lb, \[Theta][t]];
+
+solBrach = 
+  Flatten[NDSolve[{LHS1 == 
+       RHS1, \[Theta][0.001] == .001, \[Theta]'[.001] == 0, 
+      WhenEvent[x[\[Theta][t]] == \[Pi]/2, 
+       "StopIntegration"]}, \[Theta], {t, 0, \[Pi]}]][[1, 2]];
+
+Clear[t, tB];
+
+tB = Flatten[solBrach@Domain][[2]];
+tt[N_] := Flatten[sol[N]@Domain][[2]];
+
+Clear[param];
+
+param[t_, N_] := Module[{xSol, ySol, tf},
+  
+  If[t > tt[N], 
+   xSol = \[Pi]/2,
+   xSol  = sol[N][t]
+   ];
+  ySol = -((1 - E^(-N xSol) )/(1 - E^(-N \[Pi]/2)));
+  
+  
+  Return[{xSol, ySol}]
+  ]
+
+tracks = {-.5, -.001, .5, 1, 1.5, 3.5, 5, 7.5, 15, 400};
+track[t_, n_ : 20] := -((1 - E^(-n  t) )/(1 - E^(-n \[Pi]/2)));
+
+br = Show[  
+  Plot[track[T, #], {T, 0, \[Pi]/2}, 
+     PlotStyle -> {Thickness[.00125], Opacity[1], 
+       Lighter[Blue, .85]}, PlotRange -> All ] & /@ tracks,
+  ParametricPlot[{x[T], y[T]}, {T, 0, \[Pi]}, 
+   PlotStyle -> {Thickness[.004], Lighter[Green, .7]}],
+  PlotRange -> {{0, 1.57}, {-1, 0}}, Background -> Darker[Gray, .6], 
+  Axes -> False
+  ]
+
+Clear[plotTrack, plotBrach];
+
+plotTrack[t_, N_] := Graphics[
+  {Lighter[Green, .65], PointSize[.0125], Point[  param[t, N]  ]}
+  ]
+
+plotBrach[t_] := Module[{tf, xSol, ySol},
+  If[t > tB, tf = tB, tf = t];
+  Graphics[
+   {Lighter[Blue, .75], PointSize[.015], 
+    Point[  {x[solBrach[tf]], y[solBrach[tf]]}  ]}
+   ]
+  
+  ]
+
+shw[t_] := Show[br, plotTrack[t, # ] & /@ tracks, plotBrach[t]];
+
+frames = shw /@ Range[0, Max[], Max[tt /@ tracks]/750];
+
+ListAnimate[frames]
