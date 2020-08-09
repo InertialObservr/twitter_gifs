@@ -1,0 +1,199 @@
+\[CapitalTheta][t_] := If[t != 0, HeavisideTheta[t], 1]
+
+(* t is time in overlooking/stationary frame*)
+Clear[stick]
+stick[t_, \[Beta]_, relativistic_ : False, op_ : 1] := 
+ Module[{ obs = {3, 1}, l = 1, nhat = {1, 0},
+   \[Gamma],
+   xLp, xRp,
+   lSide, rSide},
+  
+  If[relativistic,
+   \[Gamma] = 1/Sqrt[1 - \[Beta]^2], 
+   \[Gamma] = 1 
+   ];
+  
+  
+  lSide = {-1/\[Gamma] l/2 + \[Beta] t, 0};
+  rSide = {1/\[Gamma] l/2 + \[Beta] t, 0};
+  
+  
+  Graphics[{White, Thickness[.005], Opacity[op], Line[{lSide, rSide}]}]
+  
+  ]
+
+
+Clear[click]
+click[t_, \[Beta]_ , x_,  relativistic_ : False, ops_ : {1, 1, 1}, 
+  ell_ : 1] := Module[{ obs = {3, 1.5},
+   
+   \[Gamma], l,
+   lSide, rSide, cSide,
+   side,
+   tLaunch, tf,
+    d0,
+   line, camera, beacons,
+   rigidBeacons,
+   color, col2,
+   rigidBeaconOp, beaconOp, rayOp
+   },
+  
+  
+  l = ell;
+  {rigidBeaconOp, beaconOp, rayOp} = ops;
+  
+  
+  If[relativistic,
+   \[Gamma] = 1/Sqrt[1 - \[Beta]^2],
+    \[Gamma] = 1  
+   ];
+  
+  
+  
+  side[\[Tau]_] := {1/\[Gamma] x + \[Beta] \[Tau], 0};
+  
+  d0 = obs[[1]] + (1/\[Gamma]) (l/2) ;
+  tf = Sqrt[d0^2 + obs[[2]]^2];
+  
+  
+  
+  tLaunch = 
+   1/((1 - \[Beta]^2) \[Gamma]) (x \[Beta] + tf \[Gamma] - 
+      obs[[1]] \[Beta] \[Gamma] - \[Gamma] \[Sqrt](obs[[1]]^2 + 
+          obs[[2]]^2 (1 - \[Beta]^2) - (
+          2 obs[[1]] (x + tf \[Beta] \[Gamma]))/\[Gamma] + (x + 
+            tf \[Beta] \[Gamma])^2/\[Gamma]^2));
+  
+  
+  
+  
+  line = {side [tLaunch],
+     side [tLaunch] +
+      \[CapitalTheta][t - tLaunch] ((obs - side[tLaunch])/
+       Norm[obs - side[tLaunch]]) *
+      If[t >= tf, tf - tLaunch, t - tLaunch]};
+  
+  
+  
+  
+  
+  camera = Disk[obs, .07];
+  
+  beacons = Disk[
+    side[If[t < tLaunch, t, tLaunch]], 
+    .05];
+  
+  rigidBeacons = 
+   Disk[
+    side[t], 
+    .05];
+  
+  
+  
+  color = Lighter[Hue[(ell/2 - x)/(3 ell/2)], .5];
+  col2 = Lighter[Hue[(ell/2 - x)/(3 ell/2)], .5];
+  
+  Graphics[{
+    
+    {Opacity[rayOp*\[CapitalTheta][t - tLaunch]], color, Line[line]},
+    {Opacity[beaconOp*\[CapitalTheta][t - tLaunch]], col2, beacons},
+     {White, camera},
+    {col2,
+     Opacity[rigidBeaconOp (.6 + .4*\[CapitalTheta][t - tLaunch])], 
+     rigidBeacons }
+    
+    }
+   ]
+  
+  
+  ]
+
+
+
+Clear[\[Beta], ell, rel, plot]
+
+plot[t_, rel_ : False, ops_ : {1, 1, 1, 1, 1}, 
+  titleOp_ : 1, \[Beta]_ : .8, ell_ : 1] :=
+ Module[
+  
+  {string, clk,
+    \[Gamma], tlF, 
+   rigidBeaconOp, rigidStickOp,
+    beaconOp, beaconStickOp, rayOp,
+   
+   OpsForClick},
+  
+  {rigidStickOp, rigidBeaconOp,
+    beaconOp, beaconStickOp, rayOp} = ops;
+  
+  OpsForClick = {rigidBeaconOp, beaconOp, rayOp};
+  
+  
+  If[rel,
+    string = "Relativistic";
+   clk = relClick;
+   \[Gamma] = 1/Sqrt[1 - \[Beta]^2];
+   tlF = tlFrel;
+   , 
+   string = "Classical";
+   clk = classicClick;
+   \[Gamma] = 1;
+   tlF = tlFclas];
+  
+  Show[ 
+   
+   stick[t, \[Beta], rel, rigidStickOp, ell],
+   
+   Graphics[
+    {Opacity[beaconStickOp], White, Thickness[.005],
+     Line[{{ -ell/(2 \[Gamma]), 0}, {ell/(2 \[Gamma]) + \[Beta] tlF, 
+        0}}]
+     }],
+   
+   
+   click[t, \[Beta], -ell/2, rel, OpsForClick, ell],
+   click[t, \[Beta], -ell/4, rel, OpsForClick, ell],
+   click[t, \[Beta], ell/4, rel, OpsForClick, ell], 
+   click[t, \[Beta],  ell/2, rel, OpsForClick, ell],
+   click[t, \[Beta], 0, rel, OpsForClick, ell],
+   
+   
+   
+   
+   PlotRange -> {{-1, 4.5}, {-1, 2.5}}, 
+   Background -> Black, 
+   ImageSize -> {600, 400}, 
+   Axes -> False,
+   
+   Epilog -> {Style[
+      Text[Rotate["click", \[Pi]/5], {3, 1.8}], White, 16, 
+      Opacity[\[CapitalTheta][t - clk]]
+      ],
+     Style[
+      Text["camera", {3.3, 1.4}], White, 12, 
+      FontFamily -> "Georgia"],
+     Style[Text[string, {1.7, 2.3}], 22, White, Opacity[titleOp],
+      FontFamily -> "Georgia"]
+     }
+   
+   ]
+  
+  ]
+  
+  
+stickOpF = 1;
+rigBeaconOpF = 1;
+beaconOpF = .5;
+stick2F = 0;
+rayOpF = 1;
+
+
+anim[t_, rel_ : True, \[Beta]_ : .8, ell_ : 1] := 
+  plot[t, rel, {stickOpF, rigBeaconOpF, beaconOpF, stick2F, rayOpF}, 
+   1, \[Beta], ell];
+   
+   
+   
+Manipulate[ anim[t, Relativistic, \[Beta], length], 
+ {t, 0, 10}, {\[Beta], .01, .99}, {length, .1, 
+  3}, {{Relativistic, False}, {True, False}} ]
