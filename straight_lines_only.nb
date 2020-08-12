@@ -1,0 +1,128 @@
+Clear[pt, point, line]
+
+pt[t_, phase_, \[Theta]_, \[CurlyPhi]_  ] := Module[{},
+  
+  {Cos[t - phase]*Sin[\[Theta]] Cos[\[CurlyPhi]], 
+   Cos[t - phase]*Sin[\[Theta]] Sin[\[CurlyPhi]], 
+   Cos[t - phase]  Cos[\[Theta]] }
+  ]
+
+
+
+
+line[ \[Delta]_, \[CurlyPhi]_, \[Theta]_ : \[Pi]/2, op_ : 1] := 
+ Module[{},
+  Show[
+   Graphics3D[{
+     Thickness[.0025],
+     Opacity[op],
+     Line[ {.1 pt[\[Delta], \[Delta], \[Theta], \[CurlyPhi]], 
+       pt[\[Delta], \[Delta], \[Theta], \[CurlyPhi]]}, 
+      VertexColors -> {  Opacity[0, Hue[\[Delta]/\[Pi]]],  
+        Opacity[1, Hue[\[Delta]/\[Pi]]]}]
+     }
+    
+    ],
+   
+   Graphics3D[{
+     Thickness[.0025],
+     Opacity[op],
+     Line[ {.1 pt[\[Delta] + \[Pi], \[Delta], \[Theta], \[CurlyPhi]], 
+       pt[\[Delta] + \[Pi], \[Delta], \[Theta], \[CurlyPhi]]}, 
+      VertexColors -> {  Opacity[0, Hue[\[Delta]/\[Pi]]],  
+        Opacity[1, Hue[\[Delta]/\[Pi]]]}]
+     }
+    
+    
+    ]
+   ]
+  ]
+
+
+point[t_, \[Delta]_, \[CurlyPhi]_, \[Theta]_ : \[Pi]/2] := Module[{},
+  Graphics3D[
+    {
+    Hue[\[Delta]/\[Pi]], 
+    Sphere[pt[t, \[Delta], \[Theta], \[CurlyPhi]], .03]
+    }
+   ]
+  ]
+  
+  
+  
+  
+  
+ptf = {4000, 2500, 5000};
+
+
+
+Clear[plt];
+
+
+plt[t_, view_ : {0, 0, 5000}, op_ : 0, \[Theta]_ : 0] :=  
+ Module[{o = .75, sc = 4},
+  
+  Show[
+   
+   Graphics3D[{White, Opacity[o],
+     Line[
+      sc {{0, 0, -1.5}, {0, 0, 1.5}}
+      ]}
+    ],
+   
+   Graphics3D[{White, Opacity[o],
+     Line[sc {
+        {-1.5, 0, 0}, {1.5, 0, 0}
+        }]}
+    ],
+   
+   Graphics3D[{White, Opacity[o],
+     Line[sc {
+        {0, -1.5, 0}, {0, 1.5, 0}
+        }]}
+    ],
+   
+   (point[t, #, #, \[Pi]/4] & /@ Range[0, \[Pi], \[Pi]/20])[[2 ;;]] ,
+   
+    (line[ #, #, \[Pi]/4, op] & /@ Range[0, \[Pi], \[Pi]/20])[[
+    2 ;;]],
+   
+   Graphics3D[
+    {White, Opacity[\[Theta]/(\[Pi]/2)], Tube[ 
+      (pt[ #, #, \[Pi]/4, #] & /@ Range[0, \[Pi], \[Pi]/20])[[2 ;;]]
+      , .01]
+     }
+    ],
+   
+   Graphics3D[
+    {White, Opacity[\[Theta]/(\[Pi]/2)], Tube[ 
+      (pt[ # + \[Pi], #, \[Pi]/4, #] & /@ Range[0, \[Pi], \[Pi]/20])[[
+       2 ;;]]
+      , .01]
+     }
+    ],
+   
+   
+   
+   ViewPoint -> 
+    RotationMatrix[\[Theta], {1, 0, 
+       0}].(view + (ptf - view) \[Theta]/(\[Pi]/2)),
+   ViewVertical -> {0, 1 - \[Theta]/(\[Pi]/2), \[Theta]/(\[Pi]/2) },
+   ViewAngle -> \[Pi]/(3.4 + 1.6 *\[Theta]/(\[Pi]/2)),
+   
+   PlotRange -> {{-1.5, 1.5}, {-1.5, 1.5}, {-1.5, 1.5}},
+   Axes -> False,
+   Boxed -> False, 
+   Epilog -> { 
+     Text[Style["@InertialObservr" , 10, Lighter[Green, .7], 
+       FontFamily -> "Georgia"],  {.84, .02}]},
+   Background -> Darker[Gray, .7]
+   
+   
+   ]
+  
+  ]
+
+Manipulate[
+ plt[t, {0, 0, 5000}, showLines, \[Theta]] , {t, 0, 
+  2 \[Pi]}, {\[Theta], 0, \[Pi]/2}, {{showLines, 0}, {0, 1}}]
